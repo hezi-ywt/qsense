@@ -21,7 +21,7 @@ The scope was later expanded to include audio and video understanding while pres
 
 ## Naming
 
-- Package name: `qingchunyu-sense-cli`
+- Package name: `qsense-cli`
 - Binary name: `qsense`
 
 The name avoids locking the long-term direction to vision only, while V1 remains image-only.
@@ -94,8 +94,8 @@ Global config location:
 Stored keys:
 
 ```env
-QINGCHUNYU_API_KEY=...
-QSENSE_BASE_URL=https://api.qingchunyu.top/v1
+QSENSE_API_KEY=...
+QSENSE_BASE_URL=https://api.openai.com/v1
 QSENSE_MODEL=gemini-3-flash-preview
 ```
 

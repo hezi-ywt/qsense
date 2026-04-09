@@ -12,7 +12,7 @@ from dotenv import dotenv_values
 CONFIG_DIR = Path.home() / ".qsense"
 CONFIG_FILE = CONFIG_DIR / ".env"
 
-DEFAULT_BASE_URL = "https://api.qingchunyu.top/v1"
+DEFAULT_BASE_URL = "https://api.openai.com/v1"
 DEFAULT_MODEL = "google/gemini-3-flash-preview"
 DEFAULT_TIMEOUT = 60
 
@@ -57,20 +57,20 @@ def run_first_time_setup() -> dict[str, str]:
 
     CONFIG_DIR.mkdir(parents=True, exist_ok=True)
     lines = [
-        f"QINGCHUNYU_API_KEY={api_key}",
+        f"QSENSE_API_KEY={api_key}",
         f"QSENSE_BASE_URL={base_url}",
         f"QSENSE_MODEL={model}",
     ]
     CONFIG_FILE.write_text("\n".join(lines) + "\n")
     print(f"[qsense] Configuration saved to {CONFIG_FILE}")
-    return {"QINGCHUNYU_API_KEY": api_key, "QSENSE_BASE_URL": base_url, "QSENSE_MODEL": model}
+    return {"QSENSE_API_KEY": api_key, "QSENSE_BASE_URL": base_url, "QSENSE_MODEL": model}
 
 
 def show_config() -> dict[str, str]:
     """Return the current persisted configuration as a dict."""
     stored = _load_config_file()
     return {
-        "api_key": _mask(stored.get("QINGCHUNYU_API_KEY", "")),
+        "api_key": _mask(stored.get("QSENSE_API_KEY", "")),
         "base_url": stored.get("QSENSE_BASE_URL", DEFAULT_BASE_URL),
         "model": stored.get("QSENSE_MODEL", DEFAULT_MODEL),
     }
@@ -92,7 +92,7 @@ def update_config(
     stored = _load_config_file()
 
     if api_key is not None:
-        stored["QINGCHUNYU_API_KEY"] = api_key
+        stored["QSENSE_API_KEY"] = api_key
     if base_url is not None:
         stored["QSENSE_BASE_URL"] = base_url
     if model is not None:
@@ -100,7 +100,7 @@ def update_config(
 
     CONFIG_DIR.mkdir(parents=True, exist_ok=True)
     lines = [
-        f"QINGCHUNYU_API_KEY={stored.get('QINGCHUNYU_API_KEY', '')}",
+        f"QSENSE_API_KEY={stored.get('QSENSE_API_KEY', '')}",
         f"QSENSE_BASE_URL={stored.get('QSENSE_BASE_URL', DEFAULT_BASE_URL)}",
         f"QSENSE_MODEL={stored.get('QSENSE_MODEL', DEFAULT_MODEL)}",
     ]
@@ -115,12 +115,12 @@ def load_config(
     """Build a Config with priority: CLI flags > env vars > config file."""
     stored = _load_config_file()
 
-    api_key = os.environ.get("QINGCHUNYU_API_KEY") or stored.get("QINGCHUNYU_API_KEY")
+    api_key = os.environ.get("QSENSE_API_KEY") or stored.get("QSENSE_API_KEY")
 
     if not api_key:
         if sys.stdin.isatty():
             stored = run_first_time_setup()
-            api_key = stored["QINGCHUNYU_API_KEY"]
+            api_key = stored["QSENSE_API_KEY"]
         else:
             print(
                 "[qsense] Missing API key. Run 'qsense init' to configure, "

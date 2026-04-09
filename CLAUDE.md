@@ -4,7 +4,7 @@
 
 QSense (`qsense`) is a CLI tool that sends images, audio, and video to multimodal LLMs via OpenAI-compatible chat completions APIs. It outputs the model's text response to stdout.
 
-Package name: `qingchunyu-sense-cli`. Binary: `qsense`.
+Package name: `qsense-cli`. Binary: `qsense`.
 
 ## Code Layout
 
@@ -35,14 +35,14 @@ src/qsense/
 
 ```bash
 # One-liner (auto-config with env var)
-QINGCHUNYU_API_KEY=sk-xxx bash setup.sh && source .venv/bin/activate
+QSENSE_API_KEY=sk-xxx bash setup.sh && source .venv/bin/activate
 
 # Or manual
 uv venv --python 3.12 && source .venv/bin/activate && uv pip install -e .
 ```
 
 setup.sh handles: uv install, venv creation, dependency install, config file creation.
-If QINGCHUNYU_API_KEY is set, config is written automatically (no interactive prompts).
+If QSENSE_API_KEY is set, config is written automatically (no interactive prompts).
 If not set, first `qsense` run will prompt interactively (requires TTY).
 
 ## Registry Format (registry.yaml)
@@ -79,8 +79,8 @@ To add a new model: append an entry to `src/qsense/registry.yaml`. No code chang
 
 `~/.qsense/.env`:
 ```
-QINGCHUNYU_API_KEY=sk-xxx
-QSENSE_BASE_URL=https://api.qingchunyu.top/v1
+QSENSE_API_KEY=sk-xxx
+QSENSE_BASE_URL=https://api.openai.com/v1
 QSENSE_MODEL=google/gemini-3-flash-preview
 ```
 

@@ -2,7 +2,7 @@
 # QSense 一键安装脚本
 # 用法:
 #   人工交互:  bash setup.sh
-#   Agent 静默: QINGCHUNYU_API_KEY=sk-xxx bash setup.sh
+#   Agent 静默: QSENSE_API_KEY=sk-xxx bash setup.sh
 set -euo pipefail
 
 REPO_DIR="$(cd "$(dirname "$0")" && pwd)"
@@ -43,17 +43,17 @@ if [ -f "$CONFIG_FILE" ]; then
     echo "[qsense] Config already exists: $CONFIG_FILE"
 else
     # 尝试从环境变量自动配置（适合 agent / CI）
-    if [ -n "${QINGCHUNYU_API_KEY:-}" ]; then
+    if [ -n "${QSENSE_API_KEY:-}" ]; then
         mkdir -p "$CONFIG_DIR"
         cat > "$CONFIG_FILE" <<EOF
-QINGCHUNYU_API_KEY=${QINGCHUNYU_API_KEY}
-QSENSE_BASE_URL=${QSENSE_BASE_URL:-https://api.qingchunyu.top/v1}
+QSENSE_API_KEY=${QSENSE_API_KEY}
+QSENSE_BASE_URL=${QSENSE_BASE_URL:-https://api.openai.com/v1}
 QSENSE_MODEL=${QSENSE_MODEL:-google/gemini-3-flash-preview}
 EOF
         echo "[qsense] Config written from environment variables: $CONFIG_FILE"
     else
-        echo "[qsense] No config found. Run 'qsense' once to set up interactively,"
-        echo "         or set QINGCHUNYU_API_KEY env var and re-run this script."
+        echo "[qsense] No config found. Run 'qsense init' to set up,"
+        echo "         or set QSENSE_API_KEY env var and re-run this script."
     fi
 fi
 

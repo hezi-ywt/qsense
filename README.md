@@ -25,7 +25,7 @@ qsense --prompt "Describe this image" --image photo.png
 ### 一键安装（Agent / CI）
 
 ```bash
-QINGCHUNYU_API_KEY=sk-xxx bash setup.sh
+QSENSE_API_KEY=sk-xxx bash setup.sh
 source .venv/bin/activate
 ```
 
@@ -115,11 +115,11 @@ qsense config
 # Update
 qsense config --model google/gemini-3.1-pro-preview
 qsense config --api-key sk-xxx
-qsense config --base-url https://api.example.com/v1
+qsense config --base-url https://api.openai.com/v1
 
 # Environment variables
-export QINGCHUNYU_API_KEY=sk-xxx
-export QSENSE_BASE_URL=https://api.qingchunyu.top/v1
+export QSENSE_API_KEY=sk-xxx
+export QSENSE_BASE_URL=https://api.openai.com/v1
 export QSENSE_MODEL=google/gemini-3-flash-preview
 ```
 

@@ -1,7 +1,7 @@
 """Probe which audio content format the API accepts.
 
 Usage:
-    QINGCHUNYU_API_KEY=xxx python tests/test_audio_format.py
+    QSENSE_API_KEY=xxx python scripts/probe_audio_format.py
 
 Generates a short sine-wave WAV, then tries two payload formats against
 gemini-3-flash-preview to find which one works.
@@ -16,7 +16,7 @@ import sys
 
 from openai import OpenAI
 
-BASE_URL = "https://api.qingchunyu.top/v1"
+BASE_URL = "https://api.openai.com/v1"
 MODEL = "gemini-3-flash-preview"
 PROMPT = "Describe what you hear in this audio."
 
@@ -57,9 +57,9 @@ def make_sine_wav(freq: int = 440, duration: float = 1.0, sample_rate: int = 160
 
 def get_api_key() -> str:
     import os
-    key = os.environ.get("QINGCHUNYU_API_KEY", "")
+    key = os.environ.get("QSENSE_API_KEY", "")
     if not key:
-        print("Set QINGCHUNYU_API_KEY env var first.", file=sys.stderr)
+        print("Set QSENSE_API_KEY env var first.", file=sys.stderr)
         sys.exit(1)
     return key
 

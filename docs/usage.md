@@ -15,15 +15,15 @@ source .venv/bin/activate
 ### Agent / CI 静默安装
 
 ```bash
-QINGCHUNYU_API_KEY=sk-xxx bash setup.sh
+QSENSE_API_KEY=sk-xxx bash setup.sh
 source .venv/bin/activate
 ```
 
-设置 `QINGCHUNYU_API_KEY` 环境变量后，配置文件自动生成，无需交互输入。
+设置 `QSENSE_API_KEY` 环境变量后，配置文件自动生成，无需交互输入。
 
 可选环境变量：
-- `QINGCHUNYU_API_KEY` -- API 密钥（必需）
-- `QSENSE_BASE_URL` -- API 地址（默认 `https://api.qingchunyu.top/v1`）
+- `QSENSE_API_KEY` -- API 密钥（必需）
+- `QSENSE_BASE_URL` -- API 地址（默认 `https://api.openai.com/v1`）
 - `QSENSE_MODEL` -- 默认模型（默认 `google/gemini-3-flash-preview`）
 
 ### 手动安装
@@ -49,7 +49,7 @@ qsense models
 $ qsense --prompt "test" --image photo.png
 [qsense] First-run setup — your answers will be saved to ~/.qsense/.env
 API key: sk-xxxxxxx
-Base URL [https://api.qingchunyu.top/v1]:
+Base URL [https://api.openai.com/v1]:
 Default model [google/gemini-3-flash-preview]:
 [qsense] Configuration saved to ~/.qsense/.env
 ```
@@ -218,7 +218,7 @@ qsense config --model google/gemini-3.1-pro-preview
 ```bash
 $ qsense config
   api_key:  sk-lkb...EiX9
-  base_url: https://api.qingchunyu.top/v1
+  base_url: https://api.openai.com/v1
   model:    google/gemini-3-flash-preview
 ```
 
@@ -236,8 +236,8 @@ qsense config --model gpt-5.4 --base-url https://new.api/v1  # 一次改多个
 环境变量优先级高于配置文件：
 
 ```bash
-export QINGCHUNYU_API_KEY=sk-xxx
-export QSENSE_BASE_URL=https://api.example.com/v1
+export QSENSE_API_KEY=sk-xxx
+export QSENSE_BASE_URL=https://api.openai.com/v1
 export QSENSE_MODEL=google/gemini-3-flash-preview
 ```
 
