@@ -6,7 +6,10 @@ import base64
 import shutil
 import subprocess
 import tempfile
-from pathlib import Path
+from pathlib import Path, PurePosixPath
+from urllib.parse import urlparse
+
+import httpx
 
 from ._util import abort as _abort
 from .audio import AudioContentPart, prepare_audio
@@ -22,7 +25,16 @@ EXTENSION_TO_MIME: dict[str, str] = {
     ".mkv": "video/x-matroska",
 }
 
+MIME_TO_EXT: dict[str, str] = {
+    "video/mp4": ".mp4",
+    "video/webm": ".webm",
+    "video/quicktime": ".mov",
+    "video/x-msvideo": ".avi",
+    "video/x-matroska": ".mkv",
+}
+
 DIRECT_MAX_BYTES = 20 * 1024 * 1024  # 20 MB
+DOWNLOAD_TIMEOUT = 120
 
 
 # ---------------------------------------------------------------------------
@@ -47,11 +59,7 @@ def _validate_video(path: Path) -> None:
 def _run_ffmpeg(args: list[str]) -> None:
     """Run ffmpeg, abort on failure."""
     try:
-        subprocess.run(
-            args,
-            check=True,
-            capture_output=True,
-        )
+        subprocess.run(args, check=True, capture_output=True)
     except subprocess.CalledProcessError as exc:
         stderr = exc.stderr.decode(errors="replace").strip()
         _abort(f"ffmpeg failed: {stderr[:300]}")
@@ -62,13 +70,63 @@ def _has_audio_stream(ffmpeg: str, video_path: Path) -> bool:
     try:
         result = subprocess.run(
             [ffmpeg, "-i", str(video_path), "-hide_banner"],
-            capture_output=True,
-            text=True,
+            capture_output=True, text=True,
         )
-        # ffmpeg -i always exits non-zero, but prints stream info to stderr
         return "Audio:" in result.stderr
     except Exception:
         return False
+
+
+def _infer_ext_from_url(url: str) -> str | None:
+    ext = PurePosixPath(urlparse(url).path).suffix.lower()
+    return ext if ext in SUPPORTED_EXTENSIONS else None
+
+
+def _download_video(url: str, max_bytes: int) -> tuple[bytes, str]:
+    """Stream-download a remote video. Returns (data, mime)."""
+    max_mb = max_bytes // 1024 // 1024
+    try:
+        with httpx.Client(timeout=DOWNLOAD_TIMEOUT, follow_redirects=True) as client:
+            with client.stream("GET", url) as resp:
+                resp.raise_for_status()
+                content_type = resp.headers.get("content-type", "").split(";")[0].strip().lower()
+
+                chunks: list[bytes] = []
+                downloaded = 0
+                for chunk in resp.iter_bytes(chunk_size=256 * 1024):
+                    downloaded += len(chunk)
+                    if downloaded > max_bytes:
+                        _abort(f"Video too large (>{max_mb} MB): {url}")
+                    chunks.append(chunk)
+    except SystemExit:
+        raise
+    except Exception as exc:
+        _abort(f"Failed to download video: {url} ({exc})")
+
+    raw = b"".join(chunks)
+    if len(raw) == 0:
+        _abort(f"Downloaded video is empty: {url}")
+
+    # Determine MIME
+    mime = content_type if content_type in MIME_TO_EXT else None
+    if not mime:
+        ext = _infer_ext_from_url(url)
+        mime = EXTENSION_TO_MIME.get(ext, "video/mp4") if ext else "video/mp4"
+
+    return raw, mime
+
+
+def _encode_local(path: Path) -> dict:
+    """Read a local video file and encode as data URL."""
+    _validate_video(path)
+    size = path.stat().st_size
+    if size > DIRECT_MAX_BYTES:
+        mb = size / 1024 / 1024
+        _abort(f"Video too large for direct mode ({mb:.1f} MB, max {DIRECT_MAX_BYTES // 1024 // 1024} MB). "
+               f"Use --video-extract for frame extraction.")
+    mime = EXTENSION_TO_MIME[path.suffix.lower()]
+    encoded = base64.b64encode(path.read_bytes()).decode()
+    return {"type": "image_url", "image_url": {"url": f"data:{mime};base64,{encoded}"}}
 
 
 # ---------------------------------------------------------------------------
@@ -76,30 +134,31 @@ def _has_audio_stream(ffmpeg: str, video_path: Path) -> bool:
 # ---------------------------------------------------------------------------
 
 def encode_video_direct(source: str) -> dict:
-    """Encode a video as a data-URL content part (``image_url`` field).
+    """Encode a video as a data-URL content part.
 
-    Used when the API proxy supports direct video passthrough.
+    * Remote URL → download, encode as base64 data URL.
+    * Local path → read, encode as base64 data URL.
     """
     if source.startswith(("http://", "https://")):
-        return {"type": "image_url", "image_url": {"url": source}}
+        raw, mime = _download_video(source, DIRECT_MAX_BYTES)
+        encoded = base64.b64encode(raw).decode()
+        return {"type": "image_url", "image_url": {"url": f"data:{mime};base64,{encoded}"}}
 
-    path = Path(source).resolve()
-    _validate_video(path)
-
-    size = path.stat().st_size
-    if size > DIRECT_MAX_BYTES:
-        mb = size / 1024 / 1024
-        _abort(f"Video too large for direct mode ({mb:.1f} MB, max {DIRECT_MAX_BYTES // 1024 // 1024} MB). "
-               f"Use --video-extract for frame extraction.")
-
-    mime = EXTENSION_TO_MIME[path.suffix.lower()]
-    encoded = base64.b64encode(path.read_bytes()).decode()
-    return {"type": "image_url", "image_url": {"url": f"data:{mime};base64,{encoded}"}}
+    return _encode_local(Path(source).resolve())
 
 
 # ---------------------------------------------------------------------------
 # Extract mode — ffmpeg frames + audio
 # ---------------------------------------------------------------------------
+
+def _download_to_tempfile(url: str, tmpdir: Path) -> Path:
+    """Download a remote video to a temp file for ffmpeg processing."""
+    raw, _ = _download_video(url, DIRECT_MAX_BYTES * 5)  # 抽帧模式允许更大文件 (100MB)
+    ext = _infer_ext_from_url(url) or ".mp4"
+    tmp_path = tmpdir / f"remote_video{ext}"
+    tmp_path.write_bytes(raw)
+    return tmp_path
+
 
 def extract_frames_and_audio(
     source: str,
@@ -110,17 +169,19 @@ def extract_frames_and_audio(
 ) -> tuple[list[ImageContentPart], AudioContentPart | None]:
     """Extract video frames and audio track using ffmpeg.
 
+    Supports both local files and remote URLs (downloaded first).
     Returns (image_content_parts, audio_content_part_or_None).
     """
-    if source.startswith(("http://", "https://")):
-        _abort("Remote video URLs are not supported in extract mode. Download the file first.")
-
-    path = Path(source).resolve()
-    _validate_video(path)
     ffmpeg = _require_ffmpeg()
 
     with tempfile.TemporaryDirectory(prefix="qsense_") as tmpdir:
         tmp = Path(tmpdir)
+
+        if source.startswith(("http://", "https://")):
+            path = _download_to_tempfile(source, tmp)
+        else:
+            path = Path(source).resolve()
+            _validate_video(path)
 
         # --- Extract frames ---
         frames_pattern = str(tmp / "frame_%04d.jpg")
@@ -135,7 +196,6 @@ def extract_frames_and_audio(
         if not frame_files:
             _abort(f"No frames extracted from video: {path}")
 
-        # Uniform sampling if too many frames
         if len(frame_files) > max_frames:
             step = len(frame_files) / max_frames
             frame_files = [frame_files[int(i * step)] for i in range(max_frames)]
