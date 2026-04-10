@@ -15,8 +15,7 @@ One command: files in, text out. QSense is the atomic unit for "let a model see/
 
 ```bash
 pip install qsense-cli
-qsense init --api-key <KEY> --base-url <URL>
-# or set env: QSENSE_API_KEY, QSENSE_BASE_URL, QSENSE_MODEL
+qsense init            # stderr will tell you what's needed -- ask the user accordingly
 ```
 
 ## Quick Reference
