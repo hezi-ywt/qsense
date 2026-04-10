@@ -199,8 +199,17 @@ def init(api_key: str | None, base_url: str | None, model: str | None, force: bo
         click.echo(f"  api_key:  {final['api_key']}")
         click.echo(f"  base_url: {final['base_url']}")
         click.echo(f"  model:    {final['model']}")
-    else:
+    elif sys.stdin.isatty():
         run_first_time_setup()
+    else:
+        click.echo(
+            "[qsense] Non-interactive environment detected. "
+            "Please provide API key and base URL:\n"
+            "  qsense init --api-key <YOUR_API_KEY> --base-url <YOUR_BASE_URL>\n"
+            "Ask the user for these values.",
+            err=True,
+        )
+        sys.exit(1)
 
     check_video_deps()
 

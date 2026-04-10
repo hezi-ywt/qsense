@@ -171,6 +171,18 @@ done
 
 保持原子，才能让上层自由选择策略。详见 [docs/design-rationale.md](docs/design-rationale.md)。
 
+## AI Agent 安装
+
+QSense 提供标准 [Agent Skills](https://agentskills.io) 格式的 Skill，支持主流 AI 编程助手。
+
+复制以下命令发给你的 Agent 即可完成安装：
+
+```
+安装 qsense 多模态感知技能：npx skills add hezi-ywt/qsense
+```
+
+支持 Claude Code、OpenCode、Codex 等遵循 Agent Skills 规范的工具。
+
 ## Requirements
 
 - Python >= 3.10
