@@ -1,10 +1,7 @@
 ---
 name: qsense
 description: "Multimodal perception CLI: send images, audio, or video to an LLM and get text back. Use for image recognition, audio transcription, video understanding, OCR, and any task where a model needs to see or hear something."
-metadata:
-  requires:
-    bins: ["qsense"]
-    optional_bins: ["ffmpeg"]
+compatibility: "Requires qsense-cli (pipx install qsense-cli). Optional: ffmpeg for video frame extraction."
 ---
 
 # QSense -- Multimodal Perception
@@ -18,7 +15,11 @@ This skill is split into three files:
 
 ## Setup
 
+Check prerequisites, then install:
+
 ```bash
+python3 --version               # need Python >= 3.10; if missing, ask user to install
+pipx --version                  # if missing: brew install pipx (macOS) / apt install pipx (Linux)
 pipx install qsense-cli         # global install, no activation needed
 qsense init                     # stderr will tell you what's needed -- ask the user accordingly
 ```
