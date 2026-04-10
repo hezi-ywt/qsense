@@ -187,14 +187,6 @@ The skill follows the Agent Skills standard (https://agentskills.io).
 Install it using your platform's skill installation method.
 ```
 
-Common install commands for reference:
-
-| Platform | Command |
-|----------|---------|
-| Claude Code | `npx skills add hezi-ywt/qsense` |
-| OpenCode | `npx skills add hezi-ywt/qsense` |
-| Codex | `npx skills add hezi-ywt/qsense` |
-
 ### Three-File Skill Design
 
 ```
