@@ -19,8 +19,8 @@ This skill is split into three files:
 ## Setup
 
 ```bash
-pip install qsense-cli
-qsense init            # stderr will tell you what's needed -- ask the user accordingly
+pipx install qsense-cli         # global install, no activation needed
+qsense init                     # stderr will tell you what's needed -- ask the user accordingly
 ```
 
 ## Quick Reference

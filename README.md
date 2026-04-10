@@ -43,27 +43,26 @@ QSense is not an app — it's the lowest-level perception primitive for skills, 
 
 ## Quick Start
 
-**One-line install:**
+**Recommended (global, no activation needed):**
+
+```bash
+pipx install qsense-cli
+qsense --prompt "Describe this image" --image photo.png
+# First run will interactively guide API key setup
+```
+
+**For development:**
 
 ```bash
 bash setup.sh && source .venv/bin/activate
-qsense --prompt "Describe this image" --image photo.png
-# First run will interactively guide API key setup
+# or: uv venv --python 3.12 && source .venv/bin/activate && uv pip install -e .
 ```
 
 **For agents / CI:**
 
 ```bash
-QSENSE_API_KEY=sk-xxx bash setup.sh
-source .venv/bin/activate
-```
-
-**Manual install:**
-
-```bash
-uv venv --python 3.12 && source .venv/bin/activate
-uv pip install -e .
-# or: pip install -e .
+pipx install qsense-cli
+QSENSE_API_KEY=sk-xxx qsense init --api-key $QSENSE_API_KEY
 ```
 
 ## Usage Examples
