@@ -184,29 +184,53 @@ Stay atomic, stay composable. See [docs/design-rationale.md](docs/design-rationa
 
 ## AI Agent Integration
 
-QSense ships with [Agent Skills](https://agentskills.io) support — a standard format recognized by Claude Code, OpenCode, Codex, and more.
+QSense is designed as a **Skill + CLI** project: the CLI is the execution layer, the Skill is the knowledge layer that teaches AI agents how to use it effectively.
 
-QSense 提供标准 Agent Skills 格式的 Skill，支持主流 AI 编程助手。
+QSense 采用 **Skill + CLI** 双层设计：CLI 是执行层，Skill 是知识层，教 AI Agent 高效使用这个工具。
 
-**Copy this to your agent / 复制以下命令发给你的 Agent：**
+### Install / 安装
+
+Copy this to your agent / 复制以下命令发给你的 Agent：
 
 ```
 Install the qsense multimodal perception skill:
 npx skills add hezi-ywt/qsense
 ```
 
-The skill includes:
-- **`SKILL.md`** — command reference, output contract, error guide
-- **`references/models.md`** — model capabilities, limits, selection strategy
-- **`references/user-notes.md`** — agent-maintained learning log that improves over time
+Compatible with Claude Code, OpenCode, Codex, and any tool following the [Agent Skills](https://agentskills.io) spec.
+
+支持 Claude Code、OpenCode、Codex 等遵循 Agent Skills 规范的工具。
+
+### Three-File Design / 三文件架构
 
 ```
 skills/qsense/
-├── SKILL.md
+├── SKILL.md                    # Stable facts / 稳定事实
+│                               # Command syntax, output contract, error guide
+│                               # 命令语法、输出约定、错误速查
+│
 └── references/
-    ├── models.md
-    └── user-notes.md
+    ├── models.md               # Model knowledge / 模型知识
+    │                           # Capabilities, limits, video/audio strategy
+    │                           # 能力表、限制、视频/音频策略
+    │                           # Syncs with `qsense models --detail`
+    │
+    └── user-notes.md           # Living memory / 持续学习记忆
+                                # Agent-maintained: preferences, patterns, lessons
+                                # Agent 自动维护：偏好、经验、教训
 ```
+
+**Why this split / 为什么这样拆分：**
+
+| File | Changes | Who maintains |
+|------|---------|---------------|
+| `SKILL.md` | Rarely — only when CLI changes | Developer / 开发者 |
+| `models.md` | When models are added/updated | Developer + Agent sync / 开发者 + Agent 同步 |
+| `user-notes.md` | Continuously during use | Agent automatically / Agent 自动 |
+
+The agent reads `user-notes.md` before each use and updates it when it learns something — a model preference, a failed command's fix, a recurring workflow. **The more you use it, the better it gets.**
+
+Agent 每次使用前读取 `user-notes.md`，发现值得记住的事就更新它——模型偏好、失败修复、常用工作流。**用得越多，越好用。**
 
 ## Project Structure
 
