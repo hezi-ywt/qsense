@@ -72,7 +72,10 @@ def main(
         print("[qsense] At least one --image, --audio, or --video is required.", file=sys.stderr)
         sys.exit(1)
 
-    cfg = load_config(model=model, timeout=timeout)
+    cfg = load_config(
+        model=model, timeout=timeout,
+        has_image=bool(images), has_audio=bool(audios), has_video=bool(videos),
+    )
 
     if not is_registered(cfg.model):
         click.echo(
@@ -114,19 +117,40 @@ def main(
 # ---------------------------------------------------------------------------
 
 @main.command()
-@click.option("--model", default=None, help="Set default model.")
+@click.option("--model", default=None, help="Set global default model.")
+@click.option("--image-model", default=None, help="Set default model for image tasks.")
+@click.option("--audio-model", default=None, help="Set default model for audio tasks.")
+@click.option("--video-model", default=None, help="Set default model for video tasks.")
 @click.option("--base-url", default=None, help="Set API base URL.")
 @click.option("--api-key", default=None, help="Set API key.")
-def config(model: str | None, base_url: str | None, api_key: str | None) -> None:
+def config(
+    model: str | None,
+    image_model: str | None,
+    audio_model: str | None,
+    video_model: str | None,
+    base_url: str | None,
+    api_key: str | None,
+) -> None:
     """Show or update persistent configuration (~/.qsense/.env)."""
-    if model is None and base_url is None and api_key is None:
+    all_none = all(v is None for v in (model, image_model, audio_model, video_model, base_url, api_key))
+
+    if all_none:
         current = show_config()
-        click.echo(f"  api_key:  {current['api_key']}")
-        click.echo(f"  base_url: {current['base_url']}")
-        click.echo(f"  model:    {current['model']}")
+        click.echo(f"  api_key:      {current['api_key']}")
+        click.echo(f"  base_url:     {current['base_url']}")
+        click.echo(f"  model:        {current['model']}")
+        if "image_model" in current:
+            click.echo(f"  image_model:  {current['image_model']}")
+        if "audio_model" in current:
+            click.echo(f"  audio_model:  {current['audio_model']}")
+        if "video_model" in current:
+            click.echo(f"  video_model:  {current['video_model']}")
         return
 
-    update_config(api_key=api_key, base_url=base_url, model=model)
+    update_config(
+        api_key=api_key, base_url=base_url, model=model,
+        image_model=image_model, audio_model=audio_model, video_model=video_model,
+    )
     updated = []
     if api_key is not None:
         updated.append("api_key")
@@ -134,6 +158,12 @@ def config(model: str | None, base_url: str | None, api_key: str | None) -> None
         updated.append(f"base_url={base_url}")
     if model is not None:
         updated.append(f"model={model}")
+    if image_model is not None:
+        updated.append(f"image_model={image_model}")
+    if audio_model is not None:
+        updated.append(f"audio_model={audio_model}")
+    if video_model is not None:
+        updated.append(f"video_model={video_model}")
     click.echo(f"[qsense] Updated: {', '.join(updated)}")
 
 

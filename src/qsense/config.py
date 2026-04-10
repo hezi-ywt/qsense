@@ -14,7 +14,22 @@ CONFIG_FILE = CONFIG_DIR / ".env"
 
 DEFAULT_BASE_URL = "https://api.openai.com/v1"
 DEFAULT_MODEL = "google/gemini-3-flash-preview"
+DEFAULT_IMAGE_MODEL = "google/gemini-3-flash-preview"
+DEFAULT_AUDIO_MODEL = "google/gemini-3-flash-preview"
+DEFAULT_VIDEO_MODEL = "google/gemini-3-flash-preview"
 DEFAULT_TIMEOUT = 60
+
+# Config keys for per-modality models
+_MODALITY_KEYS = {
+    "image": "QSENSE_IMAGE_MODEL",
+    "audio": "QSENSE_AUDIO_MODEL",
+    "video": "QSENSE_VIDEO_MODEL",
+}
+_MODALITY_DEFAULTS = {
+    "image": DEFAULT_IMAGE_MODEL,
+    "audio": DEFAULT_AUDIO_MODEL,
+    "video": DEFAULT_VIDEO_MODEL,
+}
 
 
 @dataclass
@@ -46,6 +61,10 @@ def _write_config(values: dict[str, str]) -> None:
         f"QSENSE_BASE_URL={_sanitize(values.get('QSENSE_BASE_URL', DEFAULT_BASE_URL))}",
         f"QSENSE_MODEL={_sanitize(values.get('QSENSE_MODEL', DEFAULT_MODEL))}",
     ]
+    # Per-modality models (only write if set)
+    for key in ("QSENSE_IMAGE_MODEL", "QSENSE_AUDIO_MODEL", "QSENSE_VIDEO_MODEL"):
+        if values.get(key):
+            lines.append(f"{key}={_sanitize(values[key])}")
     CONFIG_FILE.write_text("\n".join(lines) + "\n")
     CONFIG_FILE.chmod(0o600)
 
@@ -82,11 +101,16 @@ def run_first_time_setup() -> dict[str, str]:
 def show_config() -> dict[str, str]:
     """Return the current persisted configuration as a dict."""
     stored = _load_config_file()
-    return {
+    result = {
         "api_key": _mask(stored.get("QSENSE_API_KEY", "")),
         "base_url": stored.get("QSENSE_BASE_URL", DEFAULT_BASE_URL),
         "model": stored.get("QSENSE_MODEL", DEFAULT_MODEL),
     }
+    for modality, key in _MODALITY_KEYS.items():
+        val = stored.get(key)
+        if val:
+            result[f"{modality}_model"] = val
+    return result
 
 
 def _mask(value: str) -> str:
@@ -100,6 +124,9 @@ def update_config(
     api_key: str | None = None,
     base_url: str | None = None,
     model: str | None = None,
+    image_model: str | None = None,
+    audio_model: str | None = None,
+    video_model: str | None = None,
 ) -> None:
     """Update specific fields in ``~/.qsense/.env``, keeping others intact."""
     stored = _load_config_file()
@@ -110,16 +137,65 @@ def update_config(
         stored["QSENSE_BASE_URL"] = base_url
     if model is not None:
         stored["QSENSE_MODEL"] = model
+    if image_model is not None:
+        stored["QSENSE_IMAGE_MODEL"] = image_model
+    if audio_model is not None:
+        stored["QSENSE_AUDIO_MODEL"] = audio_model
+    if video_model is not None:
+        stored["QSENSE_VIDEO_MODEL"] = video_model
 
     _write_config(stored)
+
+
+def resolve_model(
+    *,
+    cli_model: str | None = None,
+    has_image: bool = False,
+    has_audio: bool = False,
+    has_video: bool = False,
+) -> str:
+    """Pick the right model based on input modalities.
+
+    Priority:
+      1. --model CLI flag (explicit override)
+      2. Per-modality default (audio > video > image, most restrictive first)
+      3. QSENSE_MODEL global default
+    """
+    if cli_model:
+        return cli_model
+
+    stored = _load_config_file()
+
+    # Audio is most restrictive (fewest models support it) → highest priority
+    if has_audio:
+        m = os.environ.get("QSENSE_AUDIO_MODEL") or stored.get("QSENSE_AUDIO_MODEL")
+        if m:
+            return m
+    if has_video:
+        m = os.environ.get("QSENSE_VIDEO_MODEL") or stored.get("QSENSE_VIDEO_MODEL")
+        if m:
+            return m
+    if has_image and not has_audio and not has_video:
+        m = os.environ.get("QSENSE_IMAGE_MODEL") or stored.get("QSENSE_IMAGE_MODEL")
+        if m:
+            return m
+
+    return (
+        os.environ.get("QSENSE_MODEL")
+        or stored.get("QSENSE_MODEL")
+        or DEFAULT_MODEL
+    )
 
 
 def load_config(
     *,
     model: str | None = None,
     timeout: int | None = None,
+    has_image: bool = False,
+    has_audio: bool = False,
+    has_video: bool = False,
 ) -> Config:
-    """Build a Config with priority: CLI flags > env vars > config file."""
+    """Build a Config with priority: CLI flags > modality default > env > file."""
     stored = _load_config_file()
 
     api_key = os.environ.get("QSENSE_API_KEY") or stored.get("QSENSE_API_KEY")
@@ -141,11 +217,11 @@ def load_config(
         or stored.get("QSENSE_BASE_URL")
         or DEFAULT_BASE_URL
     )
-    resolved_model = (
-        model
-        or os.environ.get("QSENSE_MODEL")
-        or stored.get("QSENSE_MODEL")
-        or DEFAULT_MODEL
+    resolved_model = resolve_model(
+        cli_model=model,
+        has_image=has_image,
+        has_audio=has_audio,
+        has_video=has_video,
     )
     resolved_timeout = timeout if timeout is not None else DEFAULT_TIMEOUT
 
