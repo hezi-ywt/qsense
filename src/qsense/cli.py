@@ -187,59 +187,99 @@ def init(api_key: str | None, base_url: str | None, model: str | None, force: bo
     _check_ffmpeg()
 
 
+def _has_pyav() -> bool:
+    try:
+        import av  # noqa: F401
+        return True
+    except ImportError:
+        return False
+
+
 def _check_ffmpeg() -> None:
-    """Check ffmpeg availability and offer to install."""
-    if shutil.which("ffmpeg"):
-        click.echo(f"[qsense] ffmpeg: found ({shutil.which('ffmpeg')})")
+    """Check video extract dependencies and guide the user."""
+    has_ffmpeg = shutil.which("ffmpeg")
+    has_pyav = _has_pyav()
+
+    # Best case: ffmpeg available
+    if has_ffmpeg:
+        click.echo(f"[qsense] video extract: ffmpeg ({shutil.which('ffmpeg')})" + (" + pyav" if has_pyav else ""))
         return
 
-    click.echo("[qsense] ffmpeg: not found (needed for --video-extract)")
+    # Fallback available: pyav without ffmpeg
+    if has_pyav:
+        click.echo("[qsense] video extract: pyav (pure Python, frames + audio)")
+        click.echo("  Tip: install ffmpeg for faster extraction")
+        return
 
+    # Neither available
+    click.echo("[qsense] video extract: not available")
+    click.echo("  Video direct mode (--video) works without any extra dependencies.")
+    click.echo("  Frame extraction (--video-extract) needs ffmpeg or pyav.")
+    click.echo()
+
+    # Offer choices
     os_name = platform.system()
+    install_options = _get_install_options(os_name)
 
-    # macOS + Homebrew
-    if os_name == "Darwin" and shutil.which("brew"):
-        if click.confirm("  Install ffmpeg via Homebrew?", default=True):
-            _run_install(["brew", "install", "ffmpeg"], "brew install ffmpeg")
-            return
+    if install_options:
+        click.echo("  Options:")
+        click.echo("    1) Install ffmpeg (recommended, fastest)")
+        click.echo("    2) Install pyav via pip (pure Python, no system deps)")
+        click.echo("    3) Skip (video direct mode still works)")
+        click.echo()
 
-    # Linux + apt
-    if os_name == "Linux" and shutil.which("apt"):
-        if click.confirm("  Install ffmpeg via apt?", default=True):
-            _run_install(["sudo", "apt", "install", "-y", "ffmpeg"], "sudo apt install ffmpeg")
-            return
+        choice = click.prompt("  Choose", type=click.Choice(["1", "2", "3"]), default="3")
 
-    # Windows + winget
-    if os_name == "Windows" and shutil.which("winget"):
-        if click.confirm("  Install ffmpeg via winget?", default=True):
-            _run_install(["winget", "install", "Gyan.FFmpeg"], "winget install Gyan.FFmpeg")
-            return
-
-    # Windows + choco
-    if os_name == "Windows" and shutil.which("choco"):
-        if click.confirm("  Install ffmpeg via Chocolatey?", default=True):
-            _run_install(["choco", "install", "ffmpeg", "-y"], "choco install ffmpeg -y")
-            return
-
-    # Windows + scoop
-    if os_name == "Windows" and shutil.which("scoop"):
-        if click.confirm("  Install ffmpeg via Scoop?", default=True):
-            _run_install(["scoop", "install", "ffmpeg"], "scoop install ffmpeg")
-            return
-
-    # Fallback: manual instructions
-    click.echo("  Install manually:")
-    if os_name == "Darwin":
-        click.echo("    brew install ffmpeg")
-    elif os_name == "Linux":
-        click.echo("    sudo apt install ffmpeg  # Debian/Ubuntu")
-        click.echo("    sudo dnf install ffmpeg  # Fedora")
-    elif os_name == "Windows":
-        click.echo("    winget install Gyan.FFmpeg")
-        click.echo("    # or: choco install ffmpeg")
-        click.echo("    # or: scoop install ffmpeg")
+        if choice == "1":
+            cmd, hint = install_options[0]
+            _run_install(cmd, hint)
+        elif choice == "2":
+            _install_pyav()
     else:
-        click.echo("    https://ffmpeg.org/download.html")
+        click.echo("  Options:")
+        click.echo("    1) Install pyav via pip (pure Python, no system deps)")
+        click.echo("    2) Skip (video direct mode still works)")
+        click.echo()
+
+        choice = click.prompt("  Choose", type=click.Choice(["1", "2"]), default="2")
+
+        if choice == "1":
+            _install_pyav()
+
+    if choice in ("3", "2") if install_options else choice == "2":
+        click.echo("[qsense] Skipped. You can always install later:")
+        click.echo("  pip install 'qsense-cli[video]'  # pyav")
+        click.echo("  # or install ffmpeg for your platform")
+
+
+def _get_install_options(os_name: str) -> list[tuple[list[str], str]]:
+    """Return available ffmpeg install commands for the platform."""
+    options = []
+    if os_name == "Darwin" and shutil.which("brew"):
+        options.append((["brew", "install", "ffmpeg"], "brew install ffmpeg"))
+    elif os_name == "Linux" and shutil.which("apt"):
+        options.append((["sudo", "apt", "install", "-y", "ffmpeg"], "sudo apt install ffmpeg"))
+    elif os_name == "Windows":
+        if shutil.which("winget"):
+            options.append((["winget", "install", "Gyan.FFmpeg"], "winget install Gyan.FFmpeg"))
+        elif shutil.which("choco"):
+            options.append((["choco", "install", "ffmpeg", "-y"], "choco install ffmpeg -y"))
+        elif shutil.which("scoop"):
+            options.append((["scoop", "install", "ffmpeg"], "scoop install ffmpeg"))
+    return options
+
+
+def _install_pyav() -> None:
+    """Install pyav via pip."""
+    click.echo("  Installing pyav...")
+    try:
+        subprocess.run(
+            [sys.executable, "-m", "pip", "install", "av>=12.0"],
+            check=True, capture_output=True,
+        )
+        click.echo("[qsense] pyav installed.")
+    except subprocess.CalledProcessError:
+        click.echo("[qsense] Failed. Try manually: pip install 'qsense-cli[video]'", err=True)
 
 
 def _run_install(cmd: list[str], fallback_hint: str) -> None:
