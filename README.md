@@ -185,6 +185,7 @@ Copy the following to your agent — it knows how to install skills for its own 
 Install the qsense multimodal perception skill from https://github.com/hezi-ywt/qsense
 The skill follows the Agent Skills standard (https://agentskills.io).
 Install it using your platform's skill installation method.
+For example: npx skills add hezi-ywt/qsense
 ```
 
 ### Three-File Skill Design
