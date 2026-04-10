@@ -1,14 +1,14 @@
 <p align="center">
   <h1 align="center">QSense</h1>
   <p align="center">
-    <strong>Multimodal Perception Atomic Skill</strong><br>
-    多模态感知原子技能
+    <strong>Multimodal Perception Atomic Skill</strong>
   </p>
   <p align="center">
     <a href="#quick-start">Quick Start</a> ·
     <a href="#usage-examples">Examples</a> ·
     <a href="#available-models">Models</a> ·
-    <a href="#ai-agent-integration">Agent Integration</a>
+    <a href="#ai-agent-integration">Agent Integration</a> ·
+    <a href="README_CN.md">中文文档</a>
   </p>
 </p>
 
@@ -16,11 +16,7 @@
 
 One command. Files in, text out.
 
-一条命令，让模型「看」图像、「听」音频、「看」视频，返回文字。
-
 QSense is not an app — it's the lowest-level perception primitive for skills, agents, and scripts. It does one thing: **send multimodal input to an LLM, get text back.** Video splitting, audio segmentation, batch processing, result parsing — all belong to the caller.
-
-QSense 不是应用，是给上层 skill、agent、脚本调用的最底层感知能力。它只做一件事：**把多模态输入送给模型，拿回文字结果。**
 
 ```
 ┌──────────────────────────────────────────────────────┐
@@ -47,23 +43,22 @@ QSense 不是应用，是给上层 skill、agent、脚本调用的最底层感�
 
 ## Quick Start
 
-**One-line install / 一键安装：**
+**One-line install:**
 
 ```bash
 bash setup.sh && source .venv/bin/activate
 qsense --prompt "Describe this image" --image photo.png
 # First run will interactively guide API key setup
-# 首次运行会交互式引导配置 API key
 ```
 
-**For agents / CI：**
+**For agents / CI:**
 
 ```bash
 QSENSE_API_KEY=sk-xxx bash setup.sh
 source .venv/bin/activate
 ```
 
-**Manual install / 手动安装：**
+**Manual install:**
 
 ```bash
 uv venv --python 3.12 && source .venv/bin/activate
@@ -99,8 +94,8 @@ qsense --model anthropic/claude-opus-4-6 --prompt "Analyze" --image photo.png
 ## Available Models
 
 ```bash
-qsense models           # List all models / 列出所有模型
-qsense models --detail  # Show limits / 显示详细限制
+qsense models           # List all models
+qsense models --detail  # Show detailed limits
 ```
 
 | Model | Vision | Audio | Video | Context |
@@ -141,18 +136,18 @@ Commands:
 
 ## Configuration
 
-Priority / 优先级: CLI flags > environment variables > `~/.qsense/.env`
+Priority: CLI flags > environment variables > `~/.qsense/.env`
 
 ```bash
-# Show current config / 查看当前配置
+# Show current config
 qsense config
 
-# Update / 更新配置
+# Update
 qsense config --model google/gemini-3.1-pro-preview
 qsense config --api-key sk-xxx
 qsense config --base-url https://api.openai.com/v1
 
-# Environment variables / 环境变量
+# Environment variables
 export QSENSE_API_KEY=sk-xxx
 export QSENSE_BASE_URL=https://api.openai.com/v1
 export QSENSE_MODEL=google/gemini-3-flash-preview
@@ -161,19 +156,13 @@ export QSENSE_MODEL=google/gemini-3-flash-preview
 ## Design Philosophy
 
 > QSense is an **atomic skill** — the smallest indivisible unit of perception.
->
-> QSense 是**原子技能**——不可再分的最小感知单元。
 
 **What QSense does** — send files to a model, return text. That's it.
 
 **What QSense does NOT do** — video download, audio slicing, batch iteration, result parsing, conversation management, workflow orchestration. All left to the caller.
 
-**QSense 做什么** — 把文件送给模型，返回文字。就这样。
-
-**QSense 不做什么** — 视频下载、音频切片、批量遍历、结果解析、对话管理、workflow 编排——全部留给上层组合。
-
 ```bash
-# Compose with higher-level skills / 上层 skill 组合示例
+# Compose with higher-level skills
 ffmpeg -i long.mp4 -segment_time 60 -f segment chunk_%03d.mp4
 for f in chunk_*.mp4; do
   qsense --prompt "Summarize this minute" --video "$f" >> result.txt
@@ -184,53 +173,51 @@ Stay atomic, stay composable. See [docs/design-rationale.md](docs/design-rationa
 
 ## AI Agent Integration
 
-QSense is designed as a **Skill + CLI** project: the CLI is the execution layer, the Skill is the knowledge layer that teaches AI agents how to use it effectively.
+QSense is a **Skill + CLI** project: the CLI is the execution layer, the Skill is the knowledge layer that teaches AI agents how to use it effectively.
 
-QSense 采用 **Skill + CLI** 双层设计：CLI 是执行层，Skill 是知识层，教 AI Agent 高效使用这个工具。
+### Install
 
-### Install / 安装
+**GitHub:** https://github.com/hezi-ywt/qsense
 
-Copy this to your agent / 复制以下命令发给你的 Agent：
+Copy the following to your agent — it knows how to install skills for its own platform:
 
 ```
-Install the qsense multimodal perception skill:
-npx skills add hezi-ywt/qsense
+Install the qsense multimodal perception skill from https://github.com/hezi-ywt/qsense
+The skill follows the Agent Skills standard (https://agentskills.io).
+Install it using your platform's skill installation method.
 ```
 
-Compatible with Claude Code, OpenCode, Codex, and any tool following the [Agent Skills](https://agentskills.io) spec.
+Common install commands for reference:
 
-支持 Claude Code、OpenCode、Codex 等遵循 Agent Skills 规范的工具。
+| Platform | Command |
+|----------|---------|
+| Claude Code | `npx skills add hezi-ywt/qsense` |
+| OpenCode | `npx skills add hezi-ywt/qsense` |
+| Codex | `npx skills add hezi-ywt/qsense` |
 
-### Three-File Design / 三文件架构
+### Three-File Skill Design
 
 ```
 skills/qsense/
-├── SKILL.md                    # Stable facts / 稳定事实
+├── SKILL.md                    # Stable facts
 │                               # Command syntax, output contract, error guide
-│                               # 命令语法、输出约定、错误速查
 │
 └── references/
-    ├── models.md               # Model knowledge / 模型知识
+    ├── models.md               # Model knowledge
     │                           # Capabilities, limits, video/audio strategy
-    │                           # 能力表、限制、视频/音频策略
     │                           # Syncs with `qsense models --detail`
     │
-    └── user-notes.md           # Living memory / 持续学习记忆
+    └── user-notes.md           # Living memory
                                 # Agent-maintained: preferences, patterns, lessons
-                                # Agent 自动维护：偏好、经验、教训
 ```
 
-**Why this split / 为什么这样拆分：**
-
-| File | Changes | Who maintains |
+| File | Changes | Maintained by |
 |------|---------|---------------|
-| `SKILL.md` | Rarely — only when CLI changes | Developer / 开发者 |
-| `models.md` | When models are added/updated | Developer + Agent sync / 开发者 + Agent 同步 |
-| `user-notes.md` | Continuously during use | Agent automatically / Agent 自动 |
+| `SKILL.md` | Rarely — only when CLI changes | Developer |
+| `models.md` | When models are added/updated | Developer + Agent sync |
+| `user-notes.md` | Continuously during use | Agent automatically |
 
 The agent reads `user-notes.md` before each use and updates it when it learns something — a model preference, a failed command's fix, a recurring workflow. **The more you use it, the better it gets.**
-
-Agent 每次使用前读取 `user-notes.md`，发现值得记住的事就更新它——模型偏好、失败修复、常用工作流。**用得越多，越好用。**
 
 ## Project Structure
 
