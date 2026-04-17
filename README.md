@@ -224,16 +224,21 @@ The agent reads `user-notes.md` before each use and updates it when it learns so
 ## Project Structure
 
 ```
-src/qsense/
-  cli.py            Click CLI entry point
-  client.py         OpenAI-compatible API client
-  config.py         Three-tier config: CLI > env > file
-  image.py          Image validation, resize, encoding
-  audio.py          Audio validation, download, encoding
-  video.py          Video passthrough and frame extraction
-  models.py         Model registry loader
-  registry.yaml     Curated model capabilities database
+qsense/
+├── src/qsense/
+│   ├── cli.py            # Click CLI entry (main + init / config / models)
+│   ├── client.py         # OpenAI SDK call, stream auto-detect, error scrubbing
+│   ├── config.py         # Three-tier config: CLI > env > ~/.qsense/.env
+│   ├── image.py          # Pillow resize + base64 (remote URLs pass through)
+│   ├── audio.py          # Streaming download + base64 input_audio
+│   ├── video.py          # Direct encode / passthrough / frame-extract dispatch
+│   ├── models.py         # Registry loader (registry.yaml)
+│   ├── registry.yaml     # Curated model capabilities & behavior flags
+│   └── _*.py             # Internal helpers: _util, _deps, _download, _extract, __main__
+└── skills/qsense/        # Agent-facing skill (SKILL.md + references/)
 ```
+
+Add a new model = edit `registry.yaml` only (no code changes). See [CLAUDE.md](CLAUDE.md) for the full architecture note.
 
 ## Requirements
 
