@@ -56,6 +56,6 @@ qsense --version
 ## 注意
 
 - 本地有未提交修改时,`git pull` 前先确认是否需要 `git stash`。
-- 升级后 `qsense --version` 仍是旧号 → PATH 上可能有多份 qsense;`which -a qsense` 定位,删旧的或调 PATH。
+- 升级后 `qsense --version` 仍是旧号 → PATH 上可能有多份 qsense;用 `which -a qsense`(macOS/Linux)或 `where qsense`(Windows)定位,删旧的或调 PATH。
 - `~/.qsense/.env` 不受升级影响,API key / base_url / 默认模型会保留。
 - qsense 当前没发 PyPI(2026-04),所以**没有** `pipx upgrade` 这条路。要么 `git pull`,要么 `pipx reinstall` 重建 editable 链接。
