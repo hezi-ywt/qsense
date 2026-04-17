@@ -24,6 +24,14 @@ pipx install qsense-cli         # global install, no activation needed
 qsense init                     # stderr will tell you what's needed -- ask the user accordingly
 ```
 
+## Updating
+
+When the user asks "check for updates" / "is there a new version" / "upgrade qsense",
+or you suspect the local install is stale, follow [references/update-check.md](references/update-check.md).
+It covers both pipx (PyPI) and editable git installs.
+
+Current version quick check: `qsense --version`.
+
 ## Quick Reference
 
 ```bash
