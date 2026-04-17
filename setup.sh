@@ -32,7 +32,18 @@ if [ ! -d "$VENV_DIR" ]; then
 fi
 
 # ── 3. 激活并安装 ──
-source "$VENV_DIR/bin/activate"
+# uv venv on Windows creates Scripts/activate; on macOS/Linux it's bin/activate.
+# Detect which one exists so this script works in Git Bash on Windows too.
+if [ -f "$VENV_DIR/Scripts/activate" ]; then
+    ACTIVATE="$VENV_DIR/Scripts/activate"
+elif [ -f "$VENV_DIR/bin/activate" ]; then
+    ACTIVATE="$VENV_DIR/bin/activate"
+else
+    echo "[qsense] ERROR: could not find venv activate script under $VENV_DIR"
+    exit 1
+fi
+# shellcheck source=/dev/null
+source "$ACTIVATE"
 echo "[qsense] Installing dependencies..."
 uv pip install -e "$REPO_DIR" --quiet
 
@@ -62,7 +73,7 @@ fi
 echo ""
 echo "[qsense] Installation complete!"
 echo ""
-echo "  Activate:  source $VENV_DIR/bin/activate"
+echo "  Activate:  source $ACTIVATE"
 echo "  Verify:    qsense --help"
 echo "  Models:    qsense models"
 echo ""
