@@ -36,15 +36,16 @@ pipx runpip qsense-cli show qsense-cli 2>/dev/null | grep -E "^(Location|Editabl
 qsense 有一个本地累积文件需要保护:`skills/qsense/references/user-notes.md` 是 agent 在使用中维护的用户偏好、经验、工作流。直接 `git pull` 可能会和本地改动冲突或被覆盖,所以走 stash 流程:
 
 ```bash
-# 1. 如果 user-notes.md 有本地改动,stash 出来
-git diff --quiet skills/qsense/references/user-notes.md \
+# 1. 如果 user-notes.md 有本地改动(含 staged),stash 出来
+git diff --quiet HEAD -- skills/qsense/references/user-notes.md \
   || git stash push -m "qsense:user-notes" skills/qsense/references/user-notes.md
 
 # 2. 拉取
 git pull origin main
 
-# 3. 恢复本地笔记
-git stash list | grep -q "qsense:user-notes" && git stash pop
+# 3. 恢复本地笔记 — 按 ref 弹,避免误弹其它 stash
+ref=$(git stash list | awk -F: '/qsense:user-notes/{print $1; exit}')
+[ -n "$ref" ] && git stash pop "$ref"
 ```
 
 大多数情况到这就够了 — skill 文件和库代码立即生效。

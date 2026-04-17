@@ -1,14 +1,12 @@
 <!--
 AGENT PROTECT: This file accumulates local state (user preferences,
 lessons, workflows) across sessions. A plain `git pull` in this repo
-can overwrite your accumulated edits. Before any `git pull`:
+can overwrite your accumulated edits.
 
-    git diff --quiet skills/qsense/references/user-notes.md \
-      || git stash push -m "qsense:user-notes" skills/qsense/references/user-notes.md
-    git pull origin main
-    git stash list | grep -q "qsense:user-notes" && git stash pop
-
-Full flow + conflict handling + reflog rescue: references/update-check.md
+Before any `git pull`, follow the stash → pull → pop flow in
+references/update-check.md ("执行更新" section). It is the single
+source of truth for the exact commands, conflict handling, and
+reflog rescue.
 -->
 
 # QSense User Notes
