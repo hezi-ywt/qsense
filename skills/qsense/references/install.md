@@ -70,15 +70,15 @@ qsense config            # 查看当前配置(不打印 API key)
 
 ## 以前用 pipx 装过的迁移
 
+qsense 从未发布到 PyPI,`pipx install qsense-cli` 其实从来跑不通;如果本机存在这样的条目,要么是装了一份 `pipx install --editable <本地源码>`,要么是残留。清理:
+
 ```bash
 pipx uninstall qsense-cli
 # 然后按上面"标准安装"走
 ```
 
-或者保留 pipx,但改成指向本地源码目录:
+如果想定位旧的 pipx editable 指向哪:
 
 ```bash
-pipx install --editable /path/to/qsense
+pipx runpip qsense-cli show qsense-cli 2>/dev/null | grep -E "^(Location|Editable project location)"
 ```
-
-这样 `git pull` 立刻生效,但一旦 `pyproject.toml` 变了要 `pipx reinstall qsense-cli`。

@@ -14,7 +14,8 @@ Package: `qsense-cli`. Binary: `qsense`. Docs: `docs/`.
 
 ```bash
 # Setup (once)
-pipx install qsense-cli
+git clone https://github.com/hezi-ywt/qsense.git
+cd qsense && python -m pip install -e .
 qsense init --api-key sk-xxx
 
 # Image
@@ -50,10 +51,11 @@ bash setup.sh
 # Silent mode for agents / CI
 QSENSE_API_KEY=sk-xxx bash setup.sh
 
-# End-user install
-pipx install qsense-cli
-qsense init --api-key sk-xxx   # writes ~/.qsense/.env chmod 600
+# After install, first-run config (writes ~/.qsense/.env chmod 600)
+qsense init --api-key sk-xxx
 ```
+
+qsense is not published to PyPI; `git clone + pip install -e .` is the only supported path. There is no `pipx install qsense-cli` (historical docs mentioned it, but the package was never uploaded).
 
 Entry point: `qsense = "qsense.cli:main"` (see `pyproject.toml`). Package data ships `registry.yaml` alongside the module.
 
