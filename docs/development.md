@@ -20,7 +20,7 @@ qsense init  # 配置 API key + 检测 ffmpeg
 qsense/
 ├── pyproject.toml              包配置、依赖、入口点
 ├── CLAUDE.md                   Agent 上下文（Claude Code 自动加载）
-├── README.md                   项目介绍
+├── README.md / README_CN.md    项目介绍
 ├── setup.sh                    一键安装脚本
 ├── .gitignore
 ├── docs/
@@ -30,23 +30,42 @@ qsense/
 │   └── 2026-04-09-qsense-cli-design.md  原始 V1 设计规格
 ├── scripts/
 │   └── probe_audio_format.py   音频格式探测脚本
+├── skills/qsense/              面向 agent 的 skill (SKILL.md + references/)
 └── src/qsense/
     ├── __init__.py              版本号
-    ├── _util.py                 公共工具（abort, NoReturn）
+    ├── __main__.py              支持 `python -m qsense` 启动
+    ├── _util.py                 abort(message) -> NoReturn
+    ├── _deps.py                 ffmpeg / pyav 运行时检测与安装指引
+    ├── _download.py             共享的 httpx 流式下载
+    ├── _extract.py              视频抽帧后端（ffmpeg subprocess + pyav）
     ├── cli.py                   CLI 入口（Click group + 子命令）
     ├── client.py                API 客户端（stream 自动降级）
     ├── config.py                配置加载 + 首次设置（chmod 600）
     ├── image.py                 图像处理（Pillow resize + base64）
     ├── audio.py                 音频处理（流式下载 + base64）
-    ├── video.py                 视频处理（直传/下载/抽帧）
+    ├── video.py                 视频处理（直传/下载/抽帧调度）
     ├── models.py                模型注册表加载器
     └── registry.yaml            模型注册表数据
 ```
+
+下划线前缀的模块（`_util` / `_deps` / `_download` / `_extract`）是内部共享 helper，不对外导出。
 
 ## 模块职责
 
 ### `_util.py`
 唯一导出 `abort(message) -> NoReturn`。统一错误退出：`[qsense] message` 到 stderr，exit 1。
+
+### `_deps.py`
+- `check_ffmpeg()` / `check_pyav()`: 检测抽帧依赖是否可用
+- 缺失时给出平台相关的安装建议（brew / apt / pip 提示）；供 `video.py` 在 `--video-extract` 路径上调用
+
+### `_download.py`
+- `stream_download(url, max_bytes, timeout)`: 统一的 httpx 流式下载，超限立即中断
+- 同时被 `audio.py` 和 `video.py` 调用，避免两份实现飘移
+
+### `_extract.py`
+- ffmpeg 子进程后端（默认）+ pyav（`[video]` 可选 extra）两种抽帧路径
+- `video.py` 的 `extract_frames_and_audio()` 委托到这里
 
 ### `config.py`
 - `Config` dataclass: api_key, base_url, model, timeout
@@ -136,7 +155,7 @@ qsense/
 
 1. 编辑 `src/qsense/registry.yaml`，追加一条
 2. 至少填 `id`、`name`、`vision`，其他可选
-3. 重新 `pip install -e .` 后生效
+3. editable install 下立即生效（`models.py` 按源码路径读 YAML，不需要重装）
 4. 不需要改任何 Python 代码
 
 ### 验证新模型
