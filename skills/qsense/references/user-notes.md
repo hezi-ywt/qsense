@@ -1,3 +1,14 @@
+<!--
+AGENT PROTECT: This file accumulates local state (user preferences,
+lessons, workflows) across sessions. A plain `git pull` in this repo
+can overwrite your accumulated edits.
+
+Before any `git pull`, follow the stash → pull → pop flow in
+references/update-check.md ("执行更新" section). It is the single
+source of truth for the exact commands, conflict handling, and
+reflog rescue.
+-->
+
 # QSense User Notes
 
 This file is maintained by the agent. Read it before using qsense, update it when you learn something worth remembering.

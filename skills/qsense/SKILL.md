@@ -116,3 +116,5 @@ Read `references/user-notes.md` before using qsense.
 It records this user's preferences, lessons learned, and effective patterns.
 Update it when you notice something worth remembering -- common triggers are listed inside that file, but use your own judgment too.
 Keep entries short and useful.
+
+**Before `git pull` in this repo: stash `user-notes.md` first.** It's the only file here that accumulates local state the agent depends on across sessions; a plain pull can overwrite it. See the "执行更新" section of [references/update-check.md](references/update-check.md) for the exact stash → pull → pop flow (with reflog rescue if it already got clobbered).
