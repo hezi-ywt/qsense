@@ -65,7 +65,14 @@ def _write_config(values: dict[str, str]) -> None:
     for key in ("QSENSE_IMAGE_MODEL", "QSENSE_AUDIO_MODEL", "QSENSE_VIDEO_MODEL"):
         if values.get(key):
             lines.append(f"{key}={_sanitize(values[key])}")
-    CONFIG_FILE.write_text("\n".join(lines) + "\n")
+    # Explicit UTF-8 + LF: Path.write_text defaults to the platform locale
+    # (cp936/cp1252 on Windows) which would corrupt any CJK in keys/URLs;
+    # newline="" stops the auto LF→CRLF translation so the .env stays
+    # round-trippable across OSes.
+    CONFIG_FILE.write_text(
+        "\n".join(lines) + "\n", encoding="utf-8", newline=""
+    )
+    # chmod is a no-op on Windows (NTFS has no POSIX modes), but harmless.
     CONFIG_FILE.chmod(0o600)
 
 
