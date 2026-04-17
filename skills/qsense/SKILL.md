@@ -1,28 +1,49 @@
 ---
 name: qsense
 description: "Multimodal perception CLI: send images, audio, or video to an LLM and get text back. Use for image recognition, screenshot analysis, OCR, photo description, audio transcription, video summarization, and any task where a model needs to see or hear something. Also use when comparing images, analyzing UI screenshots for errors, or extracting information from visual or audio content."
-compatibility: "Requires qsense-cli (pipx install qsense-cli). Optional: ffmpeg for video frame extraction."
+metadata:
+  requires:
+    bins: ["qsense"]
+  cliHelp: "qsense --help"
 ---
 
 # QSense -- Multimodal Perception
 
 One command: files in, text out. QSense is the atomic unit for "let a model see/hear something."
 
-This skill is split into three files:
+This skill is split by change frequency:
 - **SKILL.md** (this file) -- command syntax, output contract, error reference. Stable facts.
+- **references/install.md** -- install, first-run config, migration from pipx.
+- **references/update-check.md** -- how to check for / pull updates.
 - **references/models.md** -- model capabilities, limits, video/audio strategy. Syncs with `qsense models --detail`.
 - **references/user-notes.md** -- user preferences, learned patterns, workflows. You maintain this over time.
 
 ## Setup
 
-Check prerequisites, then install:
+Before anything else, check the CLI is installed:
 
 ```bash
-python3 --version               # need Python >= 3.10; if missing, ask user to install
-pipx --version                  # if missing: brew install pipx (macOS) / apt install pipx (Linux)
-pipx install qsense-cli         # global install, no activation needed
-qsense init                     # stderr will tell you what's needed -- ask the user accordingly
+qsense --version
 ```
+
+- Exits 0 with a version string → good, skip to [Quick Reference](#quick-reference).
+- `command not found` / non-zero exit → **not installed**; follow [references/install.md](references/install.md) and come back.
+
+qsense is distributed via git (not PyPI). The install reference covers `git clone + pip install -e .`, the `setup.sh` one-liner, and migration from a previous pipx install.
+
+After install, first-run config:
+
+```bash
+qsense init           # stderr tells you what's needed -- ask the user accordingly
+```
+
+## Updating
+
+When the user asks "check for updates" / "is there a new version" / "upgrade qsense",
+or you suspect the local install is stale, follow [references/update-check.md](references/update-check.md).
+Because qsense is git-native, the main path is `git pull` in the source directory.
+
+Current version quick check: `qsense --version`.
 
 ## Quick Reference
 

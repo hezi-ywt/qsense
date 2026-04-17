@@ -43,27 +43,45 @@ QSense is not an app — it's the lowest-level perception primitive for skills, 
 
 ## Quick Start
 
-**Recommended (global, no activation needed):**
+qsense is distributed via git (no PyPI release). Cross-platform: macOS / Linux / Windows. The recommended path is **venv-first** — it sidesteps PEP 668 on brew / Debian-style system Python.
 
 ```bash
-pipx install qsense-cli
-qsense --prompt "Describe this image" --image photo.png
-# First run will interactively guide API key setup
+git clone https://github.com/hezi-ywt/qsense.git
+cd qsense
 ```
 
-**For development:**
-
+**macOS / Linux / WSL:**
 ```bash
-bash setup.sh && source .venv/bin/activate
-# or: uv venv --python 3.12 && source .venv/bin/activate && uv pip install -e .
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -e .
 ```
 
-**For agents / CI:**
+**Windows (PowerShell):**
+```powershell
+python -m venv .venv
+.venv\Scripts\Activate.ps1
+python -m pip install -e .
+```
 
+Verify: `qsense --version`.
+
+**One-liner (macOS / Linux / WSL / Windows Git Bash, via `uv`):**
 ```bash
-pipx install qsense-cli
-QSENSE_API_KEY=sk-xxx qsense init --api-key $QSENSE_API_KEY
+bash setup.sh
+# Agent / CI (silent):
+QSENSE_API_KEY=sk-xxx bash setup.sh
 ```
+The script auto-detects `Scripts/activate` vs `bin/activate`, so Git Bash on Windows works too. Native PowerShell / CMD has no bash — use Git Bash, WSL, or the manual venv steps above.
+
+**No-install fallback (cross-platform):**
+```bash
+PYTHONPATH=src python -m qsense --help
+```
+
+**ffmpeg (optional, only for `--video-extract`):** `brew install ffmpeg` / `apt install ffmpeg` / `winget install Gyan.FFmpeg` — see [install reference](skills/qsense/references/install.md#前置) for the full table.
+
+**Updates:** `git pull` in the source directory. Only re-run `pip install -e .` if `pyproject.toml` changed.
 
 ## Usage Examples
 
@@ -211,38 +229,24 @@ skills/qsense/
 
 The agent reads `user-notes.md` before each use and updates it when it learns something — a model preference, a failed command's fix, a recurring workflow. **The more you use it, the better it gets.**
 
-### Skill-Craft: A Skill for Building Skills
-
-> ⚠️ **Experimental** — This meta-skill is in early stages and has not been validated across multiple real-world skill creation cycles. Design principles are distilled from building qsense, but may evolve significantly.
-
-This repo also includes `skills/skill-craft/`, a meta-skill that teaches agents how to design and evaluate Agent Skills. It covers:
-
-- **Structure** — Three-file layering by change frequency, progressive context loading
-- **6 Design Principles** — Greedy-but-dense descriptions, explain why not MUST, no parroting, skill memory, give URLs not commands, atomic scripts
-- **Evaluation System** — Subagent-based parallel testing, grading, blind A/B comparison, automated description optimization with train/test split
-- **CLI Design** — Separated into `references/cli-design.md` (not every skill needs a CLI)
-
-```
-skills/skill-craft/
-├── SKILL.md                  # Design principles & structure guide
-├── agents/                   # Subagent instructions (grader, comparator, analyzer)
-├── references/               # Evaluation workflow, CLI design, JSON schemas, examples
-└── scripts/                  # Automated eval: trigger testing, description optimization
-```
-
 ## Project Structure
 
 ```
-src/qsense/
-  cli.py            Click CLI entry point
-  client.py         OpenAI-compatible API client
-  config.py         Three-tier config: CLI > env > file
-  image.py          Image validation, resize, encoding
-  audio.py          Audio validation, download, encoding
-  video.py          Video passthrough and frame extraction
-  models.py         Model registry loader
-  registry.yaml     Curated model capabilities database
+qsense/
+├── src/qsense/
+│   ├── cli.py            # Click CLI entry (main + init / config / models)
+│   ├── client.py         # OpenAI SDK call, stream auto-detect, error scrubbing
+│   ├── config.py         # Three-tier config: CLI > env > ~/.qsense/.env
+│   ├── image.py          # Pillow resize + base64 (remote URLs pass through)
+│   ├── audio.py          # Streaming download + base64 input_audio
+│   ├── video.py          # Direct encode / passthrough / frame-extract dispatch
+│   ├── models.py         # Registry loader (registry.yaml)
+│   ├── registry.yaml     # Curated model capabilities & behavior flags
+│   └── _*.py             # Internal helpers: _util, _deps, _download, _extract, __main__
+└── skills/qsense/        # Agent-facing skill (SKILL.md + references/)
 ```
+
+Add a new model = edit `registry.yaml` only (no code changes). See [CLAUDE.md](CLAUDE.md) for the full architecture note.
 
 ## Requirements
 

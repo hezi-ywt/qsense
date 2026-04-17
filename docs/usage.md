@@ -2,34 +2,53 @@
 
 ## 安装
 
-### 推荐安装（全局可用，无需激活环境）
+qsense 直接从 git 源安装（未发布 PyPI），支持 macOS / Linux / Windows。完整多系统安装指南、ffmpeg 安装表、PEP 668 处理等见 [skills/qsense/references/install.md](../skills/qsense/references/install.md)。
+
+### 标准安装（venv-first，三平台通用）
 
 ```bash
-pipx install qsense-cli
+git clone https://github.com/hezi-ywt/qsense.git
+cd qsense
 ```
 
-### Agent / CI
+**macOS / Linux / WSL:**
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -e .
+```
+
+**Windows (PowerShell):**
+```powershell
+python -m venv .venv
+.venv\Scripts\Activate.ps1
+python -m pip install -e .
+```
+
+带视频抽帧扩展：`python -m pip install -e '.[video]'`（PowerShell 里用单引号）。
+
+### 一键脚本（macOS / Linux / WSL / Windows Git Bash）
 
 ```bash
-pipx install qsense-cli
-QSENSE_API_KEY=sk-xxx qsense init --api-key $QSENSE_API_KEY
+bash setup.sh
+# Agent / CI 静默:
+QSENSE_API_KEY=sk-xxx bash setup.sh
 ```
 
-环境变量：
+基于 `uv` 自动建 `.venv`，脚本会自动探测 `Scripts/activate` 或 `bin/activate`，Windows Git Bash 也能直接跑。原生 PowerShell / CMD 没 bash，用 Git Bash / WSL 跑 `setup.sh`，或者按上面"标准安装"手动走。
+
+### Agent / CI 环境变量
+
 - `QSENSE_API_KEY` -- API 密钥（必需）
 - `QSENSE_BASE_URL` -- API 地址（默认 `https://api.openai.com/v1`）
 - `QSENSE_MODEL` -- 默认模型（默认 `google/gemini-3-flash-preview`）
 
-### 开发安装
-
-```bash
-bash setup.sh && source .venv/bin/activate
-# 或: uv venv --python 3.12 && source .venv/bin/activate && uv pip install -e .
-```
+三者也可以通过 `qsense init --api-key ... --base-url ... --model ...` 写入 `~/.qsense/.env`（chmod 600）。优先级：CLI flag > 环境变量 > 配置文件。
 
 ### 验证
 
 ```bash
+qsense --version
 qsense --help
 qsense models
 ```

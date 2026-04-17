@@ -1,4 +1,6 @@
-# QSense -- Agent Context
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## What This Is
 
@@ -12,7 +14,8 @@ Package: `qsense-cli`. Binary: `qsense`. Docs: `docs/`.
 
 ```bash
 # Setup (once)
-pipx install qsense-cli
+git clone https://github.com/hezi-ywt/qsense.git
+cd qsense && python -m pip install -e .
 qsense init --api-key sk-xxx
 
 # Image
@@ -33,21 +36,55 @@ qsense --model anthropic/claude-opus-4-6 --prompt "analyze" --image photo.png
 
 Output: plain text to stdout. Errors: `[qsense] ...` to stderr, exit 1.
 
+## Install / Develop
+
+This is one of three independent siblings in the parent `基础设施/` workspace; always `cd qsense/` before running these.
+
+Cross-platform (macOS / Linux / Windows), **venv-first** to sidestep PEP 668 on system Python. Full multi-OS recipe + ffmpeg install table: [skills/qsense/references/install.md](skills/qsense/references/install.md).
+
+```bash
+# Editable install (dev) — assumes you're in a venv already
+pip install -e .
+# With video extras (pyav-based frame extraction)
+pip install -e '.[video]'
+
+# One-shot bootstrap: uv venv + editable install + optional config
+# Works on macOS / Linux / WSL / Windows Git Bash — the script detects
+# Scripts/activate vs bin/activate at runtime.
+bash setup.sh
+QSENSE_API_KEY=sk-xxx bash setup.sh   # silent mode for agents / CI
+
+# After install, first-run config (writes ~/.qsense/.env chmod 600 on Unix,
+# %USERPROFILE%\.qsense\.env on Windows — chmod is a no-op there)
+qsense init --api-key sk-xxx
+```
+
+qsense is not published to PyPI; `git clone + pip install -e .` is the only supported path. There is no `pipx install qsense-cli` (historical docs mentioned it, but the package was never uploaded). Native PowerShell / CMD users (no bash) should use Git Bash or WSL for `setup.sh`, or run the manual venv steps — see install.md.
+
+Entry point: `qsense = "qsense.cli:main"` (see `pyproject.toml`). Package data ships `registry.yaml` alongside the module.
+
+**No test suite exists in this repo.** If you add one, put it under `tests/` and keep it offline (mock the OpenAI SDK). The only existing script is `scripts/probe_audio_format.py` for manual audio-format debugging; it is not a test.
+
 ## Code Layout
 
 ```
 src/qsense/
   _util.py          abort() -> NoReturn
+  _deps.py          Runtime detection + install guidance for ffmpeg / pyav.
+  _download.py      Shared streaming httpx download (audio + video).
+  _extract.py       Frame-extraction backends (ffmpeg subprocess, pyav).
   config.py         Three-tier config: CLI > env > ~/.qsense/.env (chmod 600)
   image.py          prepare_image(s)() -- Pillow resize + base64. Remote URLs pass through.
   audio.py          prepare_audio(s)() -- streaming download + base64 input_audio.
   video.py          encode_video_direct() -- download + base64 (or URL passthrough).
-                    extract_frames_and_audio() -- ffmpeg frames + audio.
+                    extract_frames_and_audio() -- delegates to _extract.py.
   client.py         chat() -- OpenAI SDK, auto stream fallback, error sanitization.
   models.py         Registry loader from registry.yaml. Graceful fallback on errors.
   registry.yaml     Model capabilities, limits, and behavior flags.
   cli.py            Click group: inference + init + config + models subcommands.
 ```
+
+Underscore-prefixed modules (`_util`, `_deps`, `_download`, `_extract`) are internal shared helpers — don't import them from outside the package.
 
 ## Key Design Decisions
 
@@ -106,8 +143,23 @@ Env vars override file. CLI flags override both.
 | Fast image | `google/gemini-3-flash-preview` (default) |
 | Stream-only proxy | `gpt-5.4` |
 
+## Paired Skill Contract
+
+`skills/qsense/` ships next to the CLI and is what agents actually load:
+
+- `SKILL.md` -- agent-facing instructions (trigger conditions, command surface, I/O contract).
+- `evals/trigger-tests.md` -- trigger phrases used to tune skill recall; update when you change when the skill should fire.
+- `references/models.md`, `references/user-notes.md` -- detail pulled out of SKILL.md to keep the main file short.
+
+**If you change any of these, keep the CLI and the skill in sync:**
+- command surface (new subcommand, renamed flag) → update `SKILL.md`
+- output format (stdout shape, stderr prefix, exit codes) → update `SKILL.md` I/O contract
+- new model or modality in `registry.yaml` → update `references/models.md`
+- new trigger scenario → add to `evals/trigger-tests.md`
+
 ## Full Documentation
 
 - `docs/usage.md` -- Complete usage guide (Chinese)
 - `docs/development.md` -- Developer guide, registry reference, adding models/modalities
 - `docs/design-rationale.md` -- Design decisions, development history, agent skill integration
+- Parent workspace conventions: `../CLAUDE.md` (atomic-skill framing, stdout/stderr/exit-code contract shared across the three siblings)

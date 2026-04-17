@@ -182,7 +182,7 @@ name: visual-understand
 description: 使用多模态模型理解图像/音频/视频内容
 tool: qsense
 setup: |
-  pipx install qsense-cli
+  git clone https://github.com/hezi-ywt/qsense.git && cd qsense && python -m pip install -e .
   qsense init --api-key $API_KEY
 usage: |
   qsense --prompt "{prompt}" --image "{file}"

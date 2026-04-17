@@ -6,20 +6,21 @@ All notable changes to QSense are documented here.
 
 ### Added
 
-- **skill-craft meta-skill** ⚠️ *experimental* — a skill for building skills (`skills/skill-craft/`)
-  - 6 design principles: greedy-but-dense description, explain why not MUST, no parroting, skill memory, give URLs not commands, atomic scripts
-  - Complete evaluation system adapted from Anthropic's skill-creator:
-    - Subagent agents: `grader.md` (assertion evaluation + test critique), `comparator.md` (blind A/B comparison), `analyzer.md` (post-hoc analysis + benchmark pattern detection)
-    - Automation scripts: `run_eval.py` (trigger rate testing), `run_loop.py` (eval + improve loop with train/test split), `improve_description.py` (Claude + extended thinking), `aggregate_benchmark.py` (benchmark statistics)
-    - JSON schemas for evals, grading, benchmark, comparison, analysis
-  - CLI design guidance separated into `references/cli-design.md` (not every skill needs a CLI)
-  - SKILL.md follows its own layering rules: 182 lines, all operational detail in references/
 - **qsense trigger tests** — `evals/trigger-tests.md` with 10 should-trigger + 5 should-not-trigger prompts
 - **qsense description optimized** — expanded to cover screenshot analysis, photo description, UI error checking, image comparison
+- **Multi-OS install guide** — `skills/qsense/references/install.md` now covers macOS / Linux / WSL / native Windows (PowerShell + CMD), with a venv-first recipe that sidesteps PEP 668 on system Python, a cross-platform ffmpeg install table, and a FAQ for the common install pitfalls (PEP 668, PowerShell execution policy, ffmpeg-missing, PATH shadowing).
 
 ### Changed
 
-- skill-craft SKILL.md restructured: evaluation workflow, CLI design, JSON schemas moved to references/ (was 372 → 182 lines)
+- skill-craft extracted to its own repo at [hezi-ywt/skill-craft](https://github.com/hezi-ywt/skill-craft); removed from `skills/`
+- **Install path: git-native instead of pipx.** qsense is not on PyPI; main install is `git clone + python -m pip install -e .` (matches q-imgen). `pipx install qsense-cli` is removed from docs because it never worked (the package was never published). Existing pipx users: see [skills/qsense/references/install.md](skills/qsense/references/install.md) for migration.
+- Skill restructured to mirror q-imgen: install/update pulled out of `SKILL.md` into `references/install.md` and `references/update-check.md`. `SKILL.md` Setup now only checks `qsense --version` and routes to the install reference.
+
+### Fixed
+
+- **Windows compatibility** (thanks to [@Whitelinker574](https://github.com/Whitelinker574) via [#10](https://github.com/hezi-ywt/qsense/pull/10)):
+  - `config.py` now writes `~/.qsense/.env` with `encoding="utf-8", newline=""` so CJK in keys/URLs round-trips across OSes (Windows locale cp936/cp1252 was corrupting non-ASCII values).
+  - `setup.sh` auto-detects `Scripts/activate` vs `bin/activate` so the one-liner works in **Windows Git Bash**, not just macOS/Linux/WSL.
 
 ## [0.2.0] - 2026-04-10
 
