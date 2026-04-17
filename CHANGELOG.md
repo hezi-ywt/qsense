@@ -9,6 +9,10 @@ All notable changes to QSense are documented here.
 - **qsense trigger tests** — `evals/trigger-tests.md` with 10 should-trigger + 5 should-not-trigger prompts
 - **qsense description optimized** — expanded to cover screenshot analysis, photo description, UI error checking, image comparison
 
+### Changed
+
+- skill-craft extracted to its own repo at [hezi-ywt/skill-craft](https://github.com/hezi-ywt/skill-craft); removed from `skills/`
+
 ## [0.2.0] - 2026-04-10
 
 ### Added
