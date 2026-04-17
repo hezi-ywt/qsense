@@ -43,35 +43,42 @@ QSense is not an app — it's the lowest-level perception primitive for skills, 
 
 ## Quick Start
 
-qsense is distributed via git (no PyPI release). Clone and install editable:
+qsense is distributed via git (no PyPI release). Cross-platform: macOS / Linux / Windows. The recommended path is **venv-first** — it sidesteps PEP 668 on brew / Debian-style system Python.
 
 ```bash
 git clone https://github.com/hezi-ywt/qsense.git
 cd qsense
-python -m pip install -e .
-qsense --help
 ```
 
-First run (interactive):
-
+**macOS / Linux / WSL:**
 ```bash
-qsense --prompt "Describe this image" --image photo.png
-# Will guide you through API key setup on first run
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -e .
 ```
 
-**One-liner (uv-based, creates `.venv/` automatically):**
+**Windows (PowerShell):**
+```powershell
+python -m venv .venv
+.venv\Scripts\Activate.ps1
+python -m pip install -e .
+```
 
+Verify: `qsense --version`.
+
+**One-liner (macOS/Linux/WSL, via `uv`):**
 ```bash
 bash setup.sh
 # Agent / CI (silent):
 QSENSE_API_KEY=sk-xxx bash setup.sh
 ```
 
-**No-install fallback:**
-
+**No-install fallback (cross-platform):**
 ```bash
 PYTHONPATH=src python -m qsense --help
 ```
+
+**ffmpeg (optional, only for `--video-extract`):** `brew install ffmpeg` / `apt install ffmpeg` / `winget install Gyan.FFmpeg` — see [install reference](skills/qsense/references/install.md#前置) for the full table.
 
 **Updates:** `git pull` in the source directory. Only re-run `pip install -e .` if `pyproject.toml` changed.
 

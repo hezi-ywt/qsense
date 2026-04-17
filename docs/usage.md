@@ -2,25 +2,40 @@
 
 ## 安装
 
-qsense 直接从 git 源安装（未发布 PyPI）。
+qsense 直接从 git 源安装（未发布 PyPI），支持 macOS / Linux / Windows。完整多系统安装指南、ffmpeg 安装表、PEP 668 处理等见 [skills/qsense/references/install.md](../skills/qsense/references/install.md)。
 
-### 标准安装
+### 标准安装（venv-first，三平台通用）
 
 ```bash
 git clone https://github.com/hezi-ywt/qsense.git
 cd qsense
+```
+
+**macOS / Linux / WSL:**
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
 python -m pip install -e .
 ```
 
-带视频抽帧扩展：`python -m pip install -e '.[video]'`。
+**Windows (PowerShell):**
+```powershell
+python -m venv .venv
+.venv\Scripts\Activate.ps1
+python -m pip install -e .
+```
 
-### 一键脚本（基于 uv）
+带视频抽帧扩展：`python -m pip install -e '.[video]'`（PowerShell 里用单引号）。
+
+### 一键脚本（macOS / Linux / WSL）
 
 ```bash
 bash setup.sh
 # Agent / CI 静默:
 QSENSE_API_KEY=sk-xxx bash setup.sh
 ```
+
+基于 `uv` 自动建 `.venv`，Windows 用户走 WSL 或自己按"标准安装"跑。
 
 ### Agent / CI 环境变量
 

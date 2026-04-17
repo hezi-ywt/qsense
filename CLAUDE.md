@@ -40,22 +40,24 @@ Output: plain text to stdout. Errors: `[qsense] ...` to stderr, exit 1.
 
 This is one of three independent siblings in the parent `基础设施/` workspace; always `cd qsense/` before running these.
 
+Cross-platform (macOS / Linux / Windows), **venv-first** to sidestep PEP 668 on system Python. Full multi-OS recipe + ffmpeg install table: [skills/qsense/references/install.md](skills/qsense/references/install.md).
+
 ```bash
-# Editable install (dev)
+# Editable install (dev) — assumes you're in a venv already
 pip install -e .
 # With video extras (pyav-based frame extraction)
 pip install -e '.[video]'
 
-# One-shot bootstrap: uv venv + editable install + optional config
+# One-shot bootstrap: uv venv + editable install + optional config (Unix/WSL)
 bash setup.sh
-# Silent mode for agents / CI
-QSENSE_API_KEY=sk-xxx bash setup.sh
+QSENSE_API_KEY=sk-xxx bash setup.sh   # silent mode for agents / CI
 
-# After install, first-run config (writes ~/.qsense/.env chmod 600)
+# After install, first-run config (writes ~/.qsense/.env chmod 600 on Unix,
+# %USERPROFILE%\.qsense\.env on Windows)
 qsense init --api-key sk-xxx
 ```
 
-qsense is not published to PyPI; `git clone + pip install -e .` is the only supported path. There is no `pipx install qsense-cli` (historical docs mentioned it, but the package was never uploaded).
+qsense is not published to PyPI; `git clone + pip install -e .` is the only supported path. There is no `pipx install qsense-cli` (historical docs mentioned it, but the package was never uploaded). Windows users without WSL: skip `setup.sh` and run the venv + pip steps manually — see install.md.
 
 Entry point: `qsense = "qsense.cli:main"` (see `pyproject.toml`). Package data ships `registry.yaml` alongside the module.
 

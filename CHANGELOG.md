@@ -8,6 +8,7 @@ All notable changes to QSense are documented here.
 
 - **qsense trigger tests** — `evals/trigger-tests.md` with 10 should-trigger + 5 should-not-trigger prompts
 - **qsense description optimized** — expanded to cover screenshot analysis, photo description, UI error checking, image comparison
+- **Multi-OS install guide** — `skills/qsense/references/install.md` now covers macOS / Linux / WSL / native Windows (PowerShell + CMD), with a venv-first recipe that sidesteps PEP 668 on system Python, a cross-platform ffmpeg install table, and a FAQ for the common install pitfalls (PEP 668, PowerShell execution policy, ffmpeg-missing, PATH shadowing).
 
 ### Changed
 
