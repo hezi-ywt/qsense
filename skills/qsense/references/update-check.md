@@ -21,11 +21,15 @@ git log HEAD..origin/main --oneline
 找不到源码目录时:
 
 ```bash
-# 如果装的是 pip editable
+# pip editable(非 pipx 场景):
 pip show qsense-cli 2>/dev/null | grep -E "^(Location|Editable project location)"
-# 如果装的是 pipx editable
-pipx show qsense-cli 2>/dev/null | grep "Editable project location"
+
+# pipx 场景(pipx 没有 show 子命令,得用 runpip):
+pipx list --short 2>/dev/null | grep qsense-cli    # 确认存在
+pipx runpip qsense-cli show qsense-cli 2>/dev/null | grep -E "^(Location|Editable project location)"
 ```
+
+`Editable project location` 那行如果有,后面的路径就是 git 源码目录,`cd` 过去就能 `git pull`。
 
 ## 执行更新
 
