@@ -43,27 +43,37 @@ QSense is not an app — it's the lowest-level perception primitive for skills, 
 
 ## Quick Start
 
-**Recommended (global, no activation needed):**
+qsense is distributed via git (no PyPI release). Clone and install editable:
 
 ```bash
-pipx install qsense-cli
+git clone https://github.com/hezi-ywt/qsense.git
+cd qsense
+python -m pip install -e .
+qsense --help
+```
+
+First run (interactive):
+
+```bash
 qsense --prompt "Describe this image" --image photo.png
-# First run will interactively guide API key setup
+# Will guide you through API key setup on first run
 ```
 
-**For development:**
+**One-liner (uv-based, creates `.venv/` automatically):**
 
 ```bash
-bash setup.sh && source .venv/bin/activate
-# or: uv venv --python 3.12 && source .venv/bin/activate && uv pip install -e .
+bash setup.sh
+# Agent / CI (silent):
+QSENSE_API_KEY=sk-xxx bash setup.sh
 ```
 
-**For agents / CI:**
+**No-install fallback:**
 
 ```bash
-pipx install qsense-cli
-QSENSE_API_KEY=sk-xxx qsense init --api-key $QSENSE_API_KEY
+PYTHONPATH=src python -m qsense --help
 ```
+
+**Updates:** `git pull` in the source directory. Only re-run `pip install -e .` if `pyproject.toml` changed.
 
 ## Usage Examples
 

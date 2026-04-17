@@ -12,6 +12,8 @@ All notable changes to QSense are documented here.
 ### Changed
 
 - skill-craft extracted to its own repo at [hezi-ywt/skill-craft](https://github.com/hezi-ywt/skill-craft); removed from `skills/`
+- **Install path: git-native instead of pipx.** qsense is not on PyPI; main install is `git clone + python -m pip install -e .` (matches q-imgen). `pipx install qsense-cli` is removed from docs because it never worked (the package was never published). Existing pipx users: see [skills/qsense/references/install.md](skills/qsense/references/install.md) for migration.
+- Skill restructured to mirror q-imgen: install/update pulled out of `SKILL.md` into `references/install.md` and `references/update-check.md`. `SKILL.md` Setup now only checks `qsense --version` and routes to the install reference.
 
 ## [0.2.0] - 2026-04-10
 
