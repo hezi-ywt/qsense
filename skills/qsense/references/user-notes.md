@@ -1,3 +1,16 @@
+<!--
+AGENT PROTECT: This file accumulates local state (user preferences,
+lessons, workflows) across sessions. A plain `git pull` in this repo
+can overwrite your accumulated edits. Before any `git pull`:
+
+    git diff --quiet skills/qsense/references/user-notes.md \
+      || git stash push -m "qsense:user-notes" skills/qsense/references/user-notes.md
+    git pull origin main
+    git stash list | grep -q "qsense:user-notes" && git stash pop
+
+Full flow + conflict handling + reflog rescue: references/update-check.md
+-->
+
 # QSense User Notes
 
 This file is maintained by the agent. Read it before using qsense, update it when you learn something worth remembering.
