@@ -70,7 +70,7 @@ python -m pip install -e ".[video]"
 
 Windows PowerShell 里引号可能要改成单引号:`pip install -e '.[video]'`。
 
-## 一键脚本(macOS / Linux / WSL)
+## 一键脚本(macOS / Linux / WSL / Windows Git Bash)
 
 仓库根目录的 `setup.sh` 会自动装 `uv`、创建 `.venv`、editable 装,并在设置了 `QSENSE_API_KEY` 的情况下顺手写配置:
 
@@ -80,9 +80,12 @@ bash setup.sh
 QSENSE_API_KEY=sk-xxx bash setup.sh
 ```
 
-Windows 用户如果想一条命令搞定,有两个选项:
-1. 在 WSL 里跑 `setup.sh`(推荐,直接兼容)
-2. 自己手动走上面的"标准安装"(只是多几行)
+脚本会自动探测 `Scripts/activate`(Windows venv)或 `bin/activate`(Unix venv),所以 Windows Git Bash 用户也能直接跑。
+
+原生 PowerShell / CMD 下(没有 bash)三个选项:
+1. 用 Git Bash(Git for Windows 自带)跑 `bash setup.sh`
+2. WSL 里跑 `bash setup.sh`
+3. 自己手动走上面的"标准安装"(几行命令)
 
 ## 免安装临时跑(跨平台)
 

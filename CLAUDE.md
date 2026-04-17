@@ -48,16 +48,18 @@ pip install -e .
 # With video extras (pyav-based frame extraction)
 pip install -e '.[video]'
 
-# One-shot bootstrap: uv venv + editable install + optional config (Unix/WSL)
+# One-shot bootstrap: uv venv + editable install + optional config
+# Works on macOS / Linux / WSL / Windows Git Bash — the script detects
+# Scripts/activate vs bin/activate at runtime.
 bash setup.sh
 QSENSE_API_KEY=sk-xxx bash setup.sh   # silent mode for agents / CI
 
 # After install, first-run config (writes ~/.qsense/.env chmod 600 on Unix,
-# %USERPROFILE%\.qsense\.env on Windows)
+# %USERPROFILE%\.qsense\.env on Windows — chmod is a no-op there)
 qsense init --api-key sk-xxx
 ```
 
-qsense is not published to PyPI; `git clone + pip install -e .` is the only supported path. There is no `pipx install qsense-cli` (historical docs mentioned it, but the package was never uploaded). Windows users without WSL: skip `setup.sh` and run the venv + pip steps manually — see install.md.
+qsense is not published to PyPI; `git clone + pip install -e .` is the only supported path. There is no `pipx install qsense-cli` (historical docs mentioned it, but the package was never uploaded). Native PowerShell / CMD users (no bash) should use Git Bash or WSL for `setup.sh`, or run the manual venv steps — see install.md.
 
 Entry point: `qsense = "qsense.cli:main"` (see `pyproject.toml`). Package data ships `registry.yaml` alongside the module.
 

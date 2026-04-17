@@ -27,7 +27,7 @@ python -m pip install -e .
 
 带视频抽帧扩展：`python -m pip install -e '.[video]'`（PowerShell 里用单引号）。
 
-### 一键脚本（macOS / Linux / WSL）
+### 一键脚本（macOS / Linux / WSL / Windows Git Bash）
 
 ```bash
 bash setup.sh
@@ -35,7 +35,7 @@ bash setup.sh
 QSENSE_API_KEY=sk-xxx bash setup.sh
 ```
 
-基于 `uv` 自动建 `.venv`，Windows 用户走 WSL 或自己按"标准安装"跑。
+基于 `uv` 自动建 `.venv`，脚本会自动探测 `Scripts/activate` 或 `bin/activate`，Windows Git Bash 也能直接跑。原生 PowerShell / CMD 没 bash，用 Git Bash / WSL 跑 `setup.sh`，或者按上面"标准安装"手动走。
 
 ### Agent / CI 环境变量
 

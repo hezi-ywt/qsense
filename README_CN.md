@@ -66,12 +66,13 @@ python -m pip install -e .
 
 验证:`qsense --version`。
 
-**一键脚本(macOS / Linux / WSL,基于 `uv`):**
+**一键脚本(macOS / Linux / WSL / Windows Git Bash,基于 `uv`):**
 ```bash
 bash setup.sh
 # Agent / CI 静默:
 QSENSE_API_KEY=sk-xxx bash setup.sh
 ```
+脚本自动探测 `Scripts/activate` 或 `bin/activate`,所以 Windows Git Bash 也能直接跑。原生 PowerShell / CMD 没 bash — 用 Git Bash / WSL,或者走上面的标准安装。
 
 **免安装临时跑(跨平台):**
 ```bash

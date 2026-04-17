@@ -16,6 +16,12 @@ All notable changes to QSense are documented here.
 - **Install path: git-native instead of pipx.** qsense is not on PyPI; main install is `git clone + python -m pip install -e .` (matches q-imgen). `pipx install qsense-cli` is removed from docs because it never worked (the package was never published). Existing pipx users: see [skills/qsense/references/install.md](skills/qsense/references/install.md) for migration.
 - Skill restructured to mirror q-imgen: install/update pulled out of `SKILL.md` into `references/install.md` and `references/update-check.md`. `SKILL.md` Setup now only checks `qsense --version` and routes to the install reference.
 
+### Fixed
+
+- **Windows compatibility** (thanks to [@Whitelinker574](https://github.com/Whitelinker574) via [#10](https://github.com/hezi-ywt/qsense/pull/10)):
+  - `config.py` now writes `~/.qsense/.env` with `encoding="utf-8", newline=""` so CJK in keys/URLs round-trips across OSes (Windows locale cp936/cp1252 was corrupting non-ASCII values).
+  - `setup.sh` auto-detects `Scripts/activate` vs `bin/activate` so the one-liner works in **Windows Git Bash**, not just macOS/Linux/WSL.
+
 ## [0.2.0] - 2026-04-10
 
 ### Added

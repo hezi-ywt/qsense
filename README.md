@@ -66,12 +66,13 @@ python -m pip install -e .
 
 Verify: `qsense --version`.
 
-**One-liner (macOS/Linux/WSL, via `uv`):**
+**One-liner (macOS / Linux / WSL / Windows Git Bash, via `uv`):**
 ```bash
 bash setup.sh
 # Agent / CI (silent):
 QSENSE_API_KEY=sk-xxx bash setup.sh
 ```
+The script auto-detects `Scripts/activate` vs `bin/activate`, so Git Bash on Windows works too. Native PowerShell / CMD has no bash — use Git Bash, WSL, or the manual venv steps above.
 
 **No-install fallback (cross-platform):**
 ```bash
