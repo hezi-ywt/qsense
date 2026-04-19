@@ -21,12 +21,7 @@ git log HEAD..origin/main --oneline
 找不到源码目录时:
 
 ```bash
-# pip editable(非 pipx 场景):
 pip show qsense-cli 2>/dev/null | grep -E "^(Location|Editable project location)"
-
-# pipx 场景(pipx 没有 show 子命令,得用 runpip):
-pipx list --short 2>/dev/null | grep qsense-cli    # 确认存在
-pipx runpip qsense-cli show qsense-cli 2>/dev/null | grep -E "^(Location|Editable project location)"
 ```
 
 `Editable project location` 那行如果有,后面的路径就是 git 源码目录,`cd` 过去就能 `git pull`。
@@ -62,8 +57,6 @@ git stash drop
 ```bash
 git diff HEAD@{1}..HEAD -- pyproject.toml   # 有 diff 才需要
 pip install -e .
-# 或 pipx editable 装的:
-pipx reinstall qsense-cli
 ```
 
 ### 万一 user-notes.md 被覆盖了(没走 stash 流程)
@@ -87,4 +80,4 @@ qsense --version
 - 除 user-notes.md 外,其他本地未提交修改在 `git pull` 前也建议 `git stash`。
 - 升级后 `qsense --version` 仍是旧号 → PATH 上可能有多份 qsense;用 `which -a qsense`(macOS/Linux)或 `where qsense`(Windows)定位,删旧的或调 PATH。
 - `~/.qsense/.env` 不受升级影响,API key / base_url / 默认模型会保留。
-- qsense 当前没发 PyPI(2026-04),所以**没有** `pipx upgrade` 这条路。要么 `git pull`,要么 `pipx reinstall` 重建 editable 链接。
+- qsense 当前没发 PyPI,只能从 git 源更新。

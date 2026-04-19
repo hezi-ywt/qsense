@@ -70,9 +70,9 @@ python -m pip install -e ".[video]"
 
 Windows PowerShell 里引号可能要改成单引号:`pip install -e '.[video]'`。
 
-## 一键脚本(macOS / Linux / WSL / Windows Git Bash)
+## 一键脚本(macOS / Linux / Git Bash)
 
-仓库根目录的 `setup.sh` 会自动装 `uv`、创建 `.venv`、editable 装,并在设置了 `QSENSE_API_KEY` 的情况下顺手写配置:
+仓库根目录的 `setup.sh` 创建 `.venv`、editable 装,并在设置了 `QSENSE_API_KEY` 的情况下写入配置:
 
 ```bash
 bash setup.sh
@@ -80,12 +80,7 @@ bash setup.sh
 QSENSE_API_KEY=sk-xxx bash setup.sh
 ```
 
-脚本会自动探测 `Scripts/activate`(Windows venv)或 `bin/activate`(Unix venv),所以 Windows Git Bash 用户也能直接跑。
-
-原生 PowerShell / CMD 下(没有 bash)三个选项:
-1. 用 Git Bash(Git for Windows 自带)跑 `bash setup.sh`
-2. WSL 里跑 `bash setup.sh`
-3. 自己手动走上面的"标准安装"(几行命令)
+PowerShell / CMD 用户请使用上面的手动安装。
 
 ## 免安装临时跑(跨平台)
 
@@ -142,20 +137,16 @@ qsense models            # 列出支持的模型
 qsense config            # 查看当前配置(不打印 API key 全文)
 ```
 
-## 以前用 pipx 装过的迁移
+## 以前装过的迁移
 
-qsense 从未发布到 PyPI,`pipx install qsense-cli` 其实从来跑不通;如果本机存在这样的条目,要么是装了一份 `pipx install --editable <本地源码>`,要么是残留。清理:
-
-```bash
-pipx uninstall qsense-cli
-# 然后按上面"标准安装"走
-```
-
-如果想定位旧的 pipx editable 指向哪:
+如果之前用其他方式装过,确认当前版本:
 
 ```bash
-pipx runpip qsense-cli show qsense-cli 2>/dev/null | grep -E "^(Location|Editable project location)"
+qsense --version
+pip show qsense-cli 2>/dev/null | grep Location
 ```
+
+若版本不对或路径不对,按上面"标准安装"重新来。
 
 ## 常见问题
 

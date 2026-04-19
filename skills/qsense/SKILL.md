@@ -13,7 +13,7 @@ One command: files in, text out. QSense is the atomic unit for "let a model see/
 
 This skill is split by change frequency:
 - **SKILL.md** (this file) -- command syntax, output contract, error reference. Stable facts.
-- **references/install.md** -- install, first-run config, migration from pipx.
+- **references/install.md** -- install, first-run config.
 - **references/update-check.md** -- how to check for / pull updates.
 - **references/models.md** -- model capabilities, limits, video/audio strategy. Syncs with `qsense models --detail`.
 - **references/user-notes.md** -- user preferences, learned patterns, workflows. You maintain this over time.
@@ -29,7 +29,7 @@ qsense --version
 - Exits 0 with a version string → good, skip to [Quick Reference](#quick-reference).
 - `command not found` / non-zero exit → **not installed**; follow [references/install.md](references/install.md) and come back.
 
-qsense is distributed via git (not PyPI). The install reference covers `git clone + pip install -e .`, the `setup.sh` one-liner, and migration from a previous pipx install.
+qsense is distributed via git (not PyPI). The install reference covers `git clone + pip install -e .` and the `setup.sh` one-liner.
 
 After install, first-run config:
 
