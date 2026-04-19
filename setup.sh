@@ -16,7 +16,15 @@ fi
 
 PYTHON=$(command -v python3 || command -v python)
 $PYTHON -m venv .venv
-source .venv/bin/activate
+# 跨平台 venv 激活脚本检测
+if [ -f ".venv/Scripts/activate" ]; then
+    source .venv/Scripts/activate
+elif [ -f ".venv/bin/activate" ]; then
+    source .venv/bin/activate
+else
+    echo "[qsense] ERROR: could not find venv activate script"
+    exit 1
+fi
 pip install -e .
 
 if [ -n "${QSENSE_API_KEY:-}" ]; then

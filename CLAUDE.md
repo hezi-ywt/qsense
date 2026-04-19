@@ -48,9 +48,9 @@ pip install -e .
 # With video extras (pyav-based frame extraction)
 pip install -e '.[video]'
 
-# One-shot bootstrap: uv venv + editable install + optional config
-# Works on macOS / Linux / WSL / Windows Git Bash — the script detects
-# Scripts/activate vs bin/activate at runtime.
+# One-shot bootstrap: Python venv + editable install + optional config
+# macOS / Linux / Git Bash: bash setup.sh
+# Windows (PowerShell/CMD): 手动执行 venv 步骤 — 参见 install.md
 bash setup.sh
 QSENSE_API_KEY=sk-xxx bash setup.sh   # silent mode for agents / CI
 

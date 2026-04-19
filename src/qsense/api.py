@@ -13,7 +13,7 @@ Usage::
     # With audio
     response = chat("Transcribe this audio", audios=["recording.wav"])
 
-Returns the assistant's text response. Raises on config/API errors.
+Returns the assistant's text response. Exits on config/API errors (call from CLI).
 """
 
 from __future__ import annotations
@@ -40,7 +40,10 @@ def chat(
     Returns:
         The assistant's text response.
     """
-    config = load_config()
+    config = load_config(
+        has_image=bool(images),
+        has_audio=bool(audios),
+    )
 
     prepared_images = prepare_images(images) if images else None
     prepared_audios = prepare_audios(audios) if audios else None
